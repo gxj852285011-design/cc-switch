@@ -5,6 +5,23 @@ All notable changes to CC Switch will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-10-27
+
+This release introduces the Enterprise-grade Zero-Trust Relay client suite with NetBird WireGuard egress security and Device Management architecture:
+- **Zero-Trust Relay Client Integration**: Pixel-perfect implementation based on the Figma 3.0 overseas specification (`ccswitch_relay_components`), featuring an adaptive 2-column workspace, FLIP layout animations, and real-time security state management.
+- **NetBird WireGuard & DLP Audit Service**: Integrated client-side network diagnostics with dual-zone egress audit (Standard Office vs Secure Relay) and DLP leakage inspection.
+- **Enterprise Device Management Center**: Granular device listing, key provisioning with multi-tier clipboard fallback, and active status toggling.
+
+### Added
+
+- **Zero-Trust Relay Client** (`src/components/relay-client`): Full-featured client supporting 6 major AI agent tools (Claude Code, Cursor, Codex, OpenCode, Gemini, Oh My Pi) with instant configuration, speed tests, and health checks.
+- **Egress Security & DLP Engine**: Real-time inspection of outgoing telemetry and LLM requests, preventing credential leaks and verifying endpoint geo-compliance.
+- **Device Management Hub**: Device inventory table with key copying, lease status indicators, and remote activation switches.
+
+### Changed
+
+- **Build & Packaging**: Standalone `@cc-switch/relay-components@4.1.0` package distribution and host integration.
+
 ## [4.0.20] - 2026-10-24
 
 This release adds Oh My Pi as the thirteenth managed app: providers coexist in `models.yml` with enable/remove actions, MCP, Skills, prompts and sessions are supported, and the Apps page installs, updates and uninstalls `omp`. The Apps page is split into installed and not-installed sections, installed apps can be reordered by dragging and the sidebar follows that order. Official Kimi cards can be edited and removed from Kimi Code, and managed ChatGPT accounts can sign in through the browser. Other fixes cover an empty or negative DeepSeek balance shown as an expired plan, missing Kimi Code subagent usage, HTTP 429 on Skills updates, 401 on Pi usage queries with `$NAME` API keys, `<local-command-stdout>` as Claude Code session titles, and window dragging on Linux with app-level window controls.
