@@ -1,0 +1,26 @@
+{
+  "version": "4.1.0",
+  "items": [
+    {
+      "type": "new",
+      "zh": "新增零信任中继客户端与设备管理中心",
+      "zh-TW": "新增零信任中繼客戶端與設備管理中心",
+      "en": "Added Zero-Trust Relay client & device management center",
+      "ja": "ゼロトラスト中継クライアントとデバイス管理センターを追加"
+    },
+    {
+      "type": "new",
+      "zh": "整合 NetBird WireGuard 出口安全网络体检",
+      "zh-TW": "整合 NetBird WireGuard 出口安全網路體檢",
+      "en": "Integrated NetBird WireGuard egress security and DLP audit",
+      "ja": "NetBird WireGuard 出口セキュリティ監査を統合"
+    },
+    {
+      "type": "improve",
+      "zh": "优化双列自适应工作台与 FLIP 无缝收拢动效",
+      "zh-TW": "優化雙列自適應工作台與 FLIP 無縫收攏動效",
+      "en": "Optimized adaptive two-column grid and FLIP animations",
+      "ja": "適応型2列グリッドとFLIP折りたたみアニメーションを最適化"
+    }
+  ]
+}
