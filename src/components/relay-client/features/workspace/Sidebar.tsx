@@ -16,11 +16,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <aside className="w-[84px] bg-[#EFF0F5] border-r border-slate-200/60 flex flex-col items-center justify-between py-6 flex-shrink-0 z-10 box-border">
-      {/* 顶部交通灯 */}
-      <div className="flex items-center gap-2 mb-8">
-        <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]"></div>
-        <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]"></div>
-        <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]"></div>
+      {/* 顶部专线指示 */}
+      <div className="flex items-center justify-center mb-6">
+        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="中继专线引擎在线"></span>
       </div>
 
       {/* 导航项 */}

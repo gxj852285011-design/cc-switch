@@ -272,8 +272,17 @@ function MainDirectory({
     trailing?: string | string[];
     trailingLabel?: string;
     alert?: string;
+    dot?: boolean;
+    dotTone?: "neutral" | "success";
   }[] = [
-    { page: "relay", label: t("nav.relay", { defaultValue: "海外中继" }), icon: Globe },
+    {
+      page: "relay",
+      label: t("nav.relay", { defaultValue: "海外中继" }),
+      icon: Globe,
+      trailing: "专线",
+      dot: true,
+      dotTone: "success",
+    },
     { page: "mcp", label: "MCP", icon: Server },
     { page: "skills", label: "Skills", icon: SkillsIcon },
     { page: "prompts", label: t("nav.prompts"), icon: BookOpen },
@@ -341,6 +350,8 @@ function MainDirectory({
             trailing={item.trailing}
             trailingLabel={item.trailingLabel}
             alert={item.alert}
+            dot={item.dot}
+            dotTone={item.dotTone}
             onClick={() => onSelectPage(item.page)}
           />
         ))}
