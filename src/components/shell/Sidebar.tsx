@@ -273,6 +273,7 @@ function MainDirectory({
     trailingLabel?: string;
     alert?: string;
   }[] = [
+    { page: "relay", label: t("nav.relay", { defaultValue: "海外中继" }), icon: Globe },
     { page: "mcp", label: "MCP", icon: Server },
     { page: "skills", label: "Skills", icon: SkillsIcon },
     { page: "prompts", label: t("nav.prompts"), icon: BookOpen },

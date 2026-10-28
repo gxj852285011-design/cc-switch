@@ -4159,6 +4159,7 @@
     "today": "Today {{value}}",
     "todayRequests": "{{value}} req",
     "todayHitRate": "Hit {{value}}",
+    "relay": "Relay Hub",
     "usage": "Usage",
     "auth": "Accounts",
     "authNeedsReauth": "An account needs to sign in again",

@@ -15,7 +15,7 @@ export const RelayApp: React.FC = () => {
   const activeExitNode = store.activeExitNode;
 
   return (
-    <div className="w-[1150px] h-[750px] bg-[#EFF0F5] rounded-[32px] border border-white/60 shadow-2xl flex overflow-hidden select-none relative font-sans text-slate-800">
+    <div className="w-full h-full bg-[#EFF0F5] flex overflow-hidden select-none relative font-sans text-slate-800">
       {/* 1. 全局导航侧边栏 */}
       <Sidebar
         viewMode={store.viewMode}

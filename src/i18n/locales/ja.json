@@ -4159,6 +4159,7 @@
     "today": "今日 {{value}}",
     "todayRequests": "{{value}} 回",
     "todayHitRate": "ヒット {{value}}",
+    "relay": "海外中継",
     "usage": "使用量",
     "auth": "アカウント",
     "authNeedsReauth": "再ログインが必要なアカウントがあります",

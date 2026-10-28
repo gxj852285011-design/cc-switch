@@ -11,11 +11,11 @@
 
 import type { DeviceKeyItem, DeviceKeyStatus, ToolId, AgentIconType } from './types';
 
-// Octopus X 官方网关与控制台接口常量 (已与线上接口 100% 对齐)
-export const DEFAULT_OCTOPUS_ORIGIN = 'https://octopusx.ai';
-export const DEFAULT_OCTOPUS_GATEWAY = 'https://octopusx.ai/v1';
-export const DEFAULT_OCTOPUS_CREATE_KEY_API = 'https://octopusx.ai/api/token/';
-export const DEFAULT_OCTOPUS_STATUS_API_PREFIX = 'https://octopusx.ai/app/token';
+// 云端网关与控制台接口常量 (已绑定专属 ECS 同步中继实例: 123.56.181.193)
+export const DEFAULT_OCTOPUS_ORIGIN = 'http://123.56.181.193:3000';
+export const DEFAULT_OCTOPUS_GATEWAY = 'http://123.56.181.193:3000/v1';
+export const DEFAULT_OCTOPUS_CREATE_KEY_API = 'http://123.56.181.193:3000/api/token/';
+export const DEFAULT_OCTOPUS_STATUS_API_PREFIX = 'http://123.56.181.193:3000/app/token';
 
 // 安全基线规范：消除全局明文硬编码 Master Token，支持由 OS 钥匙串或内存状态注入
 export const DEFAULT_LOOPBACK_GATEWAY = 'http://127.0.0.1:28848';
