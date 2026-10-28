@@ -49,9 +49,9 @@ export const AgentGrid: React.FC<AgentGridProps> = ({
                 onSelectAgent(agent.id);
               }
             }}
-            className="group p-4 bg-white/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer flex items-center justify-between"
+            className="group p-4 bg-white/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer flex items-center justify-between overflow-hidden flex-shrink-0"
           >
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3.5 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-slate-100/80 flex items-center justify-center p-2 group-hover:scale-105 transition-transform">
                 <AgentIcon name={agent.iconType} size={24} />
               </div>
@@ -94,9 +94,9 @@ export const AgentGrid: React.FC<AgentGridProps> = ({
                 onSelectAgent(agent.id);
               }
             }}
-            className="group p-4 bg-white/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer flex items-center justify-between"
+            className="group p-4 bg-white/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer flex items-center justify-between overflow-hidden flex-shrink-0"
           >
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3.5 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-slate-100/80 flex items-center justify-center p-2 group-hover:scale-105 transition-transform">
                 <AgentIcon name={agent.iconType} size={24} />
               </div>
