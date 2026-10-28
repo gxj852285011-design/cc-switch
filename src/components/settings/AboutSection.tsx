@@ -20,7 +20,7 @@ import { useUpdate } from "@/contexts/UpdateContext";
 import { Badge } from "@/components/ui/badge";
 import { WhatsNewDialog } from "@/components/WhatsNewDialog";
 import { WHATS_NEW_ENTRIES, entriesUpTo } from "@/lib/whatsNew";
-import ccswitchLogo from "@/assets/icons/logo.svg";
+import hubLogo from "@/assets/icons/logo.svg";
 import { extractErrorMessage } from "@/utils/errorUtils";
 
 interface AboutSectionProps {
@@ -104,13 +104,13 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
 
       if (!displayVersion) {
         await settingsApi.openExternal(
-          "https://github.com/farion1231/cc-switch/releases",
+          "https://github.com/gxj852285011-design/cc-switch/releases",
         );
         return;
       }
 
       await settingsApi.openExternal(
-        `https://github.com/farion1231/cc-switch/releases/tag/${displayVersion}`,
+        `https://github.com/gxj852285011-design/cc-switch/releases/tag/${displayVersion}`,
       );
     } catch (error) {
       console.error("[AboutSection] Failed to open release notes", error);
@@ -119,7 +119,7 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
   }, [t, updateInfo?.availableVersion, version]);
 
   const handleOpenGithub = useCallback(() => {
-    void settingsApi.openExternal("https://github.com/farion1231/cc-switch");
+    void settingsApi.openExternal("https://github.com/gxj852285011-design/cc-switch");
   }, []);
 
   const handleDismissStarPrompt = useCallback(() => {
@@ -198,13 +198,13 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
     <div className="divide-y divide-border overflow-hidden rounded-panel border border-border bg-surface">
       <div className="flex flex-wrap items-center gap-4 px-5 py-4">
         <img
-          src={ccswitchLogo}
-          alt=""
+          src={hubLogo}
+          alt="AI Agent Hub Logo"
           draggable={false}
           className="h-10 w-10 shrink-0 p-1"
         />
         <div className="min-w-0 flex-1">
-          <div className="text-title text-fg-1">CC Switch</div>
+          <div className="text-title text-fg-1">AI Agent Hub</div>
           <div className="flex flex-wrap items-center gap-2 text-caption text-fg-2">
             {isLoadingVersion ? (
               <Loader2 className="h-3 w-3 animate-spin" />

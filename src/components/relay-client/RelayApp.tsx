@@ -4,7 +4,7 @@ import { SPHERE_3D_BASE64, DEVICE_3D_BASE64 } from './core/constants/assets';
 import { RelayCloudService } from './RelayCloudService';
 import { NetBirdEngineService } from './NetBirdEngineService';
 import { AuthCenterModal } from './features/auth/AuthCenterModal';
-import { HermesIcon, CherryStudioIcon, ChatboxIcon, KimiIcon, CursorIcon, CodexIcon } from '../BrandIcons';
+import { CodexIcon, KimiIcon, DoubaoIcon, YuanbaoIcon, TongyiIcon, ZhipuIcon } from '../BrandIcons';
 
 export type ViewMode = 'home' | 'devices' | 'security';
 export type SecurityVendor = 'openai' | 'global';
@@ -34,63 +34,42 @@ interface AgentCardData {
   downloadUrl?: string;
 }
 
-// 精选主流 6 款核心常用 Agent 数据集（主打 ToC 桌面客户端与无封号风险平台）
+// 权威精选 6 款知名大厂官方桌面端（知名科技大厂官方桌面客户端，无任何第三方或杂乱脚本）
 const INITIAL_AGENTS: AgentCardData[] = [
-  // 第一列：国内极火与国民级生产力桌面端
+  // 第一列：国内三大顶尖互联网大厂 AI 桌面端
   {
     id: 1,
-    toolId: 'cherry-studio',
+    toolId: 'doubao',
     category: 'desktop',
-    title: 'Cherry Studio',
-    sub: '国内热门多模型桌面端',
-    badge: '未安装',
-    isConfigured: false,
-    col: 1,
-    btnLabel: '安装客户端',
-    btnDark: false,
-    desc: '国内备受欢迎的开源 AI 桌面客户端，支持全厂商模型聚合、知识库管理，直连海外加速专线。',
-    quickCmd: 'open "/Applications/Cherry Studio.app"',
-    vendor: 'openai',
-    needsEgressCheck: false,
-    isDesktopApp: true,
-    appName: 'Cherry Studio',
-    appPath: '/Applications/Cherry Studio.app',
-    officialWebUrl: 'https://cherry-ai.com',
-    svg: <CherryStudioIcon size={24} className="w-6 h-6 flex-shrink-0" />
-  },
-  {
-    id: 2,
-    toolId: 'chatbox',
-    category: 'desktop',
-    title: 'Chatbox 桌面端',
-    sub: '国民级 AI 生产力桌面端',
-    badge: '未安装',
-    isConfigured: false,
-    col: 1,
-    btnLabel: '安装客户端',
-    btnDark: false,
-    desc: '数百万 ToC 用户的国民级 AI 办公助手，原生支持一键填入专线中转 Host 与 API 密钥。',
-    quickCmd: 'open /Applications/Chatbox.app',
-    vendor: 'openai',
-    needsEgressCheck: false,
-    isDesktopApp: true,
-    appName: 'Chatbox',
-    appPath: '/Applications/Chatbox.app',
-    officialWebUrl: 'https://chatboxai.app',
-    svg: <ChatboxIcon size={24} className="w-6 h-6 flex-shrink-0" />
-  },
-  {
-    id: 3,
-    toolId: 'kimi',
-    category: 'desktop',
-    title: 'Kimi 桌面端',
-    sub: '月之暗面长文本桌面端',
+    title: '豆包 桌面端',
+    sub: '字节跳动 官方 AI 桌面端',
     badge: '已安装',
     isConfigured: false,
     col: 1,
     btnLabel: '配置专线',
     btnDark: false,
-    desc: '月之暗面官方桌面客户端，超长上下文与深度文档问答，国内 IP 零门槛畅通访问。',
+    desc: '字节跳动旗舰 AI 桌面客户端，支持全能 AI 搜索、智能写作与多模态交互，专线加速直连。',
+    quickCmd: 'open -a Doubao',
+    vendor: 'domestic',
+    needsEgressCheck: false,
+    isDesktopApp: true,
+    appName: 'Doubao',
+    appPath: '/Applications/Doubao.app',
+    officialWebUrl: 'https://www.doubao.com',
+    svg: <DoubaoIcon size={24} className="w-6 h-6 flex-shrink-0" />
+  },
+  {
+    id: 2,
+    toolId: 'kimi',
+    category: 'desktop',
+    title: 'Kimi 桌面端',
+    sub: '月之暗面 官方长文本桌面端',
+    badge: '已安装',
+    isConfigured: false,
+    col: 1,
+    btnLabel: '配置专线',
+    btnDark: false,
+    desc: '月之暗面官方长文本与深度文档问答客户端，数十万字长资料秒级解析与全能研报提炼。',
     quickCmd: 'open -a "Kimi Code"',
     vendor: 'domestic',
     needsEgressCheck: false,
@@ -100,19 +79,40 @@ const INITIAL_AGENTS: AgentCardData[] = [
     officialWebUrl: 'https://kimi.moonshot.cn',
     svg: <KimiIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
-  // 第二列：全球主流桌面端与自主智能体
+  {
+    id: 3,
+    toolId: 'yuanbao',
+    category: 'desktop',
+    title: '腾讯元宝 桌面端',
+    sub: '腾讯官方 AI 桌面助手',
+    badge: '未安装',
+    isConfigured: false,
+    col: 1,
+    btnLabel: '安装客户端',
+    btnDark: false,
+    desc: '腾讯混元大模型官方桌面客户端，深度连接微信公众号内容生态与腾讯文档，专业级搜索创作。',
+    quickCmd: 'open -a "腾讯元宝" 2>/dev/null || open -a "Yuanbao" 2>/dev/null || open https://yuanbao.tencent.com',
+    vendor: 'domestic',
+    needsEgressCheck: false,
+    isDesktopApp: true,
+    appName: '腾讯元宝',
+    appPath: '/Applications/腾讯元宝.app',
+    officialWebUrl: 'https://yuanbao.tencent.com',
+    svg: <YuanbaoIcon size={24} className="w-6 h-6 flex-shrink-0" />
+  },
+  // 第二列：全球与国内顶级大厂主流桌面端
   {
     id: 4,
-    toolId: 'codex-desktop',
+    toolId: 'chatgpt',
     category: 'desktop',
     title: 'ChatGPT 桌面端',
     sub: 'OpenAI 官方桌面端 · 已就绪',
     badge: '已安装',
-    isConfigured: false,
+    isConfigured: true,
     col: 2,
-    btnLabel: '配置专线',
-    btnDark: false,
-    desc: 'OpenAI 官方 macOS 桌面应用，深度集成 Canvas 协同画布、语音模式与跨应用智能工作流。',
+    btnLabel: '已配置',
+    btnDark: true,
+    desc: 'OpenAI 全球顶尖 AI 桌面应用，深度集成 Canvas 协同画布与语音交互，由纯净海外专线接管。',
     quickCmd: 'open -a ChatGPT',
     vendor: 'openai',
     needsEgressCheck: true,
@@ -124,42 +124,45 @@ const INITIAL_AGENTS: AgentCardData[] = [
   },
   {
     id: 5,
-    toolId: 'cursor',
+    toolId: 'tongyi',
     category: 'desktop',
-    title: 'Cursor 桌面端',
-    sub: 'AI 原生智能工作台',
+    title: '通义 桌面端',
+    sub: '阿里巴巴 官方 AI 办公桌面端',
     badge: '未安装',
     isConfigured: false,
     col: 2,
     btnLabel: '安装客户端',
     btnDark: false,
-    desc: '全球顶尖 AI 智能桌面工作区，原生支持中转专线注入，ToC 与个人独立创作者首选。',
-    quickCmd: 'open /Applications/Cursor.app',
-    vendor: 'openai',
+    desc: '阿里巴巴通义千问官方桌面助手，深度赋能实时会议音视频转写速读与专业级办公创作。',
+    quickCmd: 'open -a "通义" 2>/dev/null || open -a "Qwen" 2>/dev/null || open https://tongyi.aliyun.com',
+    vendor: 'domestic',
     needsEgressCheck: false,
     isDesktopApp: true,
-    appName: 'Cursor',
-    appPath: '/Applications/Cursor.app',
-    officialWebUrl: 'https://cursor.com',
-    svg: <CursorIcon size={24} className="w-6 h-6 flex-shrink-0" />
+    appName: '通义',
+    appPath: '/Applications/通义.app',
+    officialWebUrl: 'https://tongyi.aliyun.com',
+    svg: <TongyiIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
   {
     id: 6,
-    toolId: 'hermes',
-    category: 'official',
-    title: 'Hermes',
-    sub: 'Nous 深度推理自主 Agent',
-    badge: '已安装',
+    toolId: 'zhipu',
+    category: 'desktop',
+    title: '智谱清言 桌面端',
+    sub: '智谱 AI / GLM 官方桌面端',
+    badge: '未安装',
     isConfigured: false,
     col: 2,
-    btnLabel: '配置专线',
+    btnLabel: '安装客户端',
     btnDark: false,
-    desc: 'Nous Research 顶级开源自主智能体，用户实测已验证跑通，支持专线直连与多步自主推理。',
-    quickCmd: 'hermes',
-    installCmd: 'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash',
-    vendor: 'openai',
+    desc: '清华系顶尖大模型官方桌面客户端，拥有超强中文代码与逻辑分析能力，内置丰富智能体生态。',
+    quickCmd: 'open -a "智谱清言" 2>/dev/null || open -a "ChatGLM" 2>/dev/null || open https://chatglm.cn',
+    vendor: 'domestic',
     needsEgressCheck: false,
-    svg: <HermesIcon size={24} className="w-6 h-6 rounded-full" />
+    isDesktopApp: true,
+    appName: '智谱清言',
+    appPath: '/Applications/智谱清言.app',
+    officialWebUrl: 'https://chatglm.cn',
+    svg: <ZhipuIcon size={24} className="w-6 h-6 flex-shrink-0" />
   }
 ];
 
@@ -208,8 +211,8 @@ export const RelayApp: React.FC = () => {
   const [selectedDeviceId, setSelectedDeviceId] = useState<number>(1);
   const [deviceKeyStatusMap, setDeviceKeyStatusMap] = useState<Record<string, boolean>>({
     'key_chatgpt': true,
-    'key_cherry': true,
-    'key_hermes': false
+    'key_doubao': true,
+    'key_kimi': true
   });
 
   // 4. 网络防封中心状态
@@ -283,13 +286,14 @@ export const RelayApp: React.FC = () => {
         console.warn('CLI probe error:', e);
       }
 
-      // 2. 探测桌面图形客户端（macOS /Applications/）
+      // 2. 探测知名大厂桌面图形客户端（macOS /Applications/）
       const desktopApps = [
-        { id: 1, appName: 'Cherry Studio', path: '/Applications/Cherry Studio.app' },
-        { id: 2, appName: 'Chatbox', path: '/Applications/Chatbox.app' },
-        { id: 3, appName: 'Kimi Code', path: '/Applications/Kimi Code.app' },
+        { id: 1, appName: 'Doubao', path: '/Applications/Doubao.app' },
+        { id: 2, appName: 'Kimi Code', path: '/Applications/Kimi Code.app' },
+        { id: 3, appName: '腾讯元宝', path: '/Applications/腾讯元宝.app' },
         { id: 4, appName: 'ChatGPT', path: '/Applications/ChatGPT.app' },
-        { id: 5, appName: 'Cursor', path: '/Applications/Cursor.app' }
+        { id: 5, appName: '通义', path: '/Applications/通义.app' },
+        { id: 6, appName: '智谱清言', path: '/Applications/智谱清言.app' }
       ];
       const desktopResults: Record<number, boolean> = {};
       for (const d of desktopApps) {
@@ -870,7 +874,7 @@ export const RelayApp: React.FC = () => {
             <div className="flex-1 h-full pt-[24px] px-[32px] pb-[32px] flex flex-col justify-start items-start gap-4 box-border transition-all duration-500 overflow-hidden">
               <div className="w-full flex-1 flex flex-row justify-start items-start gap-[16px] box-border transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden">
                 
-                {/* 第 1 列 (桌面常用左列: Cherry Studio, Chatbox, Kimi) */}
+                {/* 第 1 列 (知名大厂 AI 桌面端: 豆包, Kimi, 腾讯元宝) */}
                 <div id="expanded-col-1" className="w-[243px] min-w-[243px] max-w-[243px] max-h-[503px] overflow-y-auto pr-1 flex flex-col items-start gap-[16px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 0 }}>
                   {col1Agents.map(a => (
                     <div
@@ -1286,7 +1290,7 @@ export const RelayApp: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 第 2 列 (常用右列: Codex 客户端, Codex CLI, OpenClaw) */}
+                {/* 第 2 列 (全球与国内主流大厂桌面端: ChatGPT, 通义, 智谱清言) */}
                 <div id="expanded-col-2" className="w-[243px] min-w-[243px] max-w-[243px] max-h-[503px] overflow-y-auto pr-1 flex flex-col items-start gap-[16px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 2 }}>
                   {col2Agents.map(a => (
                     <div
@@ -1413,9 +1417,9 @@ export const RelayApp: React.FC = () => {
               {/* Key 矩阵卡片 */}
               <div className="w-full flex flex-col gap-3">
                 {[
-                  { id: 'key_chatgpt', tool: 'ChatGPT / Codex', key: 'sk-relay-1006-chat...8831', statusKey: 'key_chatgpt' },
-                  { id: 'key_cherry', tool: 'Cherry Studio', key: 'sk-relay-1007-cher...4419', statusKey: 'key_cherry' },
-                  { id: 'key_hermes', tool: 'Hermes Agent', key: 'sk-relay-1008-herm...1102', statusKey: 'key_hermes' }
+                  { id: 'key_chatgpt', tool: 'ChatGPT 桌面端', key: 'sk-relay-1006-chat...8831', statusKey: 'key_chatgpt' },
+                  { id: 'key_doubao', tool: '豆包 桌面端', key: 'sk-relay-1007-doub...4419', statusKey: 'key_doubao' },
+                  { id: 'key_kimi', tool: 'Kimi 桌面端', key: 'sk-relay-1008-kimi...1102', statusKey: 'key_kimi' }
                 ].map(item => {
                   const isActive = deviceKeyStatusMap[item.statusKey] ?? true;
                   return (

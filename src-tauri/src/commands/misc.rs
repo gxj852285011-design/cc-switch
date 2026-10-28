@@ -148,17 +148,27 @@ pub async fn check_desktop_app_installed(app_name_or_path: String) -> Result<boo
             check_names.push("ChatGPT".to_string());
             check_names.push("Codex".to_string());
             check_names.push("Codex++".to_string());
+        } else if clean_name.eq_ignore_ascii_case("doubao") || clean_name == "豆包" {
+            check_names.push("Doubao".to_string());
+            check_names.push("豆包".to_string());
         } else if clean_name.eq_ignore_ascii_case("kimi") || clean_name.eq_ignore_ascii_case("kimi code") || clean_name.eq_ignore_ascii_case("kimicode") {
             check_names.push("Kimi".to_string());
             check_names.push("Kimi Code".to_string());
             check_names.push("KimiCode".to_string());
-        } else if clean_name.eq_ignore_ascii_case("cherry") || clean_name.eq_ignore_ascii_case("cherry studio") || clean_name.eq_ignore_ascii_case("cherrystudio") {
-            check_names.push("Cherry Studio".to_string());
-            check_names.push("CherryStudio".to_string());
-            check_names.push("Cherry".to_string());
-        } else if clean_name.eq_ignore_ascii_case("chatbox") || clean_name.eq_ignore_ascii_case("chatbox ai") {
-            check_names.push("Chatbox".to_string());
-            check_names.push("Chatbox AI".to_string());
+        } else if clean_name.eq_ignore_ascii_case("yuanbao") || clean_name == "腾讯元宝" || clean_name == "元宝" {
+            check_names.push("腾讯元宝".to_string());
+            check_names.push("Yuanbao".to_string());
+            check_names.push("元宝".to_string());
+        } else if clean_name.eq_ignore_ascii_case("tongyi") || clean_name.eq_ignore_ascii_case("qwen") || clean_name == "通义" || clean_name == "通义千问" {
+            check_names.push("通义".to_string());
+            check_names.push("通义千问".to_string());
+            check_names.push("Qwen".to_string());
+            check_names.push("Tongyi".to_string());
+        } else if clean_name.eq_ignore_ascii_case("zhipu") || clean_name.eq_ignore_ascii_case("chatglm") || clean_name == "智谱清言" {
+            check_names.push("智谱清言".to_string());
+            check_names.push("ChatGLM".to_string());
+            check_names.push("GLM".to_string());
+            check_names.push("Zhipu".to_string());
         } else if clean_name.eq_ignore_ascii_case("cursor") {
             check_names.push("Cursor".to_string());
         }

@@ -24,6 +24,111 @@ export function KimiIcon({ size = 24, className = "" }: IconProps) {
   );
 }
 
+export function DoubaoIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <rect width="24" height="24" rx="6" fill="#00C7C4" />
+      <path
+        d="M7 11C7 9.34 8.34 8 10 8H14C15.66 8 17 9.34 17 11V13C17 14.66 15.66 16 14 16H10C8.34 16 7 14.66 7 13V11Z"
+        fill="white"
+      />
+      <circle cx="10" cy="11.5" r="1.2" fill="#0F172A" />
+      <circle cx="14" cy="11.5" r="1.2" fill="#0F172A" />
+      <path
+        d="M10.5 13.5C11 14.2 13 14.2 13.5 13.5"
+        stroke="#0F172A"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function YuanbaoIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <defs>
+        <linearGradient id="ybGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#F59E0B" />
+          <stop offset="1" stopColor="#D97706" />
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill="url(#ybGrad)" />
+      <path
+        d="M6 14C6 11 8.5 7 12 7C15.5 7 18 11 18 14C18 16.5 15.5 17.5 12 17.5C8.5 17.5 6 16.5 6 14Z"
+        fill="white"
+        fillOpacity="0.25"
+      />
+      <path
+        d="M8 12.5C9.5 9.5 14.5 9.5 16 12.5C14.5 15.5 9.5 15.5 8 12.5Z"
+        fill="white"
+      />
+      <circle cx="12" cy="12.5" r="2" fill="#F59E0B" />
+    </svg>
+  );
+}
+
+export function TongyiIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <defs>
+        <linearGradient id="tyGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#6366F1" />
+          <stop offset="1" stopColor="#4F46E5" />
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill="url(#tyGrad)" />
+      <circle cx="12" cy="12" r="5.5" stroke="white" strokeWidth="2" strokeDasharray="3 1.5" />
+      <path d="M9.5 12H14.5M12 9.5V14.5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function ZhipuIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <defs>
+        <linearGradient id="zpGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#2563EB" />
+          <stop offset="1" stopColor="#1E40AF" />
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill="url(#zpGrad)" />
+      <path d="M12 5L17.5 8.2V15.8L12 19L6.5 15.8V8.2L12 5Z" stroke="white" strokeWidth="1.6" />
+      <path d="M12 5V12M12 12L17.5 15.8M12 12L6.5 15.8" stroke="white" strokeWidth="1.6" />
+      <circle cx="12" cy="12" r="1.8" fill="#60A5FA" />
+    </svg>
+  );
+}
+
 export function CherryStudioIcon({ size = 24, className = "" }: IconProps) {
   return (
     <svg
