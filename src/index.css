@@ -592,3 +592,79 @@ input[type="password"]::-ms-clear {
     flex: 1 1 0%;
   }
 }
+
+/* ==================== Relay Hub 专属动画与卡片锁定样式 ==================== */
+.hero-collapsed {
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  transition: width 480ms cubic-bezier(0.4, 0, 0.2, 1), opacity 360ms ease-in, padding 480ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.hero-expanded {
+  width: 360px !important;
+  max-width: 360px !important;
+  min-width: 360px !important;
+  padding: 24px 24px 64px 24px !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  transition: width 480ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms ease-out 80ms, padding 480ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.drawer-collapsed {
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 !important;
+  border-width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  transition: width 480ms cubic-bezier(0.4, 0, 0.2, 1), opacity 360ms ease-in, padding 480ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.drawer-expanded {
+  width: 360px !important;
+  min-width: 360px !important;
+  max-width: 360px !important;
+  padding: 20px !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  border: 1px solid white !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  transition: width 480ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms ease-out 80ms, padding 480ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.drawer-content-box-anim {
+  transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 保证卡片列与卡片本体绝对不被挤压压缩 */
+#expanded-col-1, #expanded-col-2, .agent-card {
+  flex-shrink: 0 !important;
+  width: 243px !important;
+  min-width: 243px !important;
+  max-width: 243px !important;
+}
+
+/* 隐藏滚动条 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
