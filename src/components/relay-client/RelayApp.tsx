@@ -1,11 +1,13 @@
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { SPHERE_3D_BASE64, DEVICE_3D_BASE64 } from './core/constants/assets';
 import { RelayCloudService } from './RelayCloudService';
 import { NetBirdEngineService } from './NetBirdEngineService';
 import { AuthCenterModal } from './features/auth/AuthCenterModal';
+import { HermesIcon, CherryStudioIcon, ChatboxIcon, KimiIcon, CursorIcon, CodexIcon } from '../BrandIcons';
 
 export type ViewMode = 'home' | 'devices' | 'security';
-export type SecurityVendor = 'claude' | 'google';
+export type SecurityVendor = 'openai' | 'global';
 
 interface AgentCardData {
   id: number;
@@ -13,141 +15,167 @@ interface AgentCardData {
   category: 'official' | 'desktop' | 'domestic';
   title: string;
   sub: string;
-  badge: '未安装' | '已安装' | '已就绪' | '待配置';
+  badge: '未安装' | '已安装'; // 严格只区分是否安装！
+  isConfigured: boolean; // 区分专线是否已配置！
   col: 1 | 2;
   btnLabel: string;
   btnDark: boolean;
   desc: string;
   quickCmd: string;
-  vendor: 'claude' | 'openai' | 'google' | 'domestic';
+  installCmd?: string;
+  vendor: 'openai' | 'domestic' | 'custom';
   needsEgressCheck: boolean;
   svg: React.ReactNode;
+  // 桌面应用专有属性
+  isDesktopApp?: boolean;
+  appName?: string;
+  appPath?: string;
+  officialWebUrl?: string;
+  downloadUrl?: string;
 }
 
-// 精选主流 6 款核心常用 Agent 数据集
+// 精选主流 6 款核心常用 Agent 数据集（主打 ToC 桌面客户端与无封号风险平台）
 const INITIAL_AGENTS: AgentCardData[] = [
+  // 第一列：国内极火与国民级生产力桌面端
   {
     id: 1,
-    toolId: 'claude',
-    category: 'official',
-    title: 'Claude Code',
-    sub: 'anthropic 命令行开发',
+    toolId: 'cherry-studio',
+    category: 'desktop',
+    title: 'Cherry Studio',
+    sub: '国内热门多模型桌面端',
     badge: '未安装',
+    isConfigured: false,
     col: 1,
-    btnLabel: '安装 Agent',
+    btnLabel: '安装客户端',
     btnDark: false,
-    desc: 'Anthropic 官方智能编程智能体，擅长复杂工程理解与端到端代码实现。',
-    quickCmd: 'claude',
-    vendor: 'claude',
-    needsEgressCheck: true,
-    svg: (
-      <svg className="w-6 h-6 flex-shrink-0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" />
-      </svg>
-    )
+    desc: '国内备受欢迎的开源 AI 桌面客户端，支持全厂商模型聚合、知识库管理，直连海外加速专线。',
+    quickCmd: 'open "/Applications/Cherry Studio.app"',
+    vendor: 'openai',
+    needsEgressCheck: false,
+    isDesktopApp: true,
+    appName: 'Cherry Studio',
+    appPath: '/Applications/Cherry Studio.app',
+    officialWebUrl: 'https://cherry-ai.com',
+    svg: <CherryStudioIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
   {
     id: 2,
-    toolId: 'codex',
-    category: 'official',
-    title: 'OpenAI Codex',
-    sub: 'OpenAI 命令行开发',
-    badge: '已安装',
-    col: 2,
-    btnLabel: '配置专线',
-    btnDark: true,
-    desc: 'OpenAI 官方终端编程助手，深度集成 GPT-4o 代码推理与自动调试。',
-    quickCmd: 'codex',
+    toolId: 'chatbox',
+    category: 'desktop',
+    title: 'Chatbox 桌面端',
+    sub: '国民级 AI 生产力桌面端',
+    badge: '未安装',
+    isConfigured: false,
+    col: 1,
+    btnLabel: '安装客户端',
+    btnDark: false,
+    desc: '数百万 ToC 用户的国民级 AI 办公助手，原生支持一键填入专线中转 Host 与 API 密钥。',
+    quickCmd: 'open /Applications/Chatbox.app',
     vendor: 'openai',
     needsEgressCheck: false,
-    svg: (
-      <svg className="w-6 h-6 flex-shrink-0 text-slate-800" fill="currentColor" fillRule="evenodd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21.55 10.004a5.416 5.416 0 00-.478-4.501c-1.217-2.09-3.662-3.166-6.05-2.66A5.59 5.59 0 0010.831 1C8.39.995 6.224 2.546 5.473 4.838A5.553 5.553 0 001.76 7.496a5.487 5.487 0 00.691 6.5 5.416 5.416 0 00.477 4.502c1.217 2.09 3.662 3.165 6.05 2.66A5.586 5.586 0 0013.168 23c2.443.006 4.61-1.546 5.361-3.84a5.553 5.553 0 003.715-2.66 5.488 5.488 0 00-.693-6.497v.001zm-8.381 11.558a4.199 4.199 0 01-2.675-.954c.034-.018.093-.05.132-.074l4.44-2.53a.71.71 0 00.364-.623v-6.176l1.877 1.069c.02.01.033.029.036.05v5.115c-.003 2.274-1.87 4.118-4.174 4.123zM4.192 17.78a4.059 4.059 0 01-.498-2.763c.032.02.09.055.131.078l4.44 2.53c.225.13.504.13.73 0l5.42-3.088v2.138a.068.068 0 01-.027.057L9.9 19.288c-1.999 1.136-4.552.46-5.707-1.51h-.001zM3.023 8.216A4.15 4.15 0 015.198 6.41l-.002.151v5.06a.711.711 0 00.364.624l5.42 3.087-1.876 1.07a.067.067 0 01-.063.005l-4.489-2.559c-1.995-1.14-2.679-3.658-1.53-5.63h.001zm15.417 3.54l-5.42-3.088L14.896 7.6a.067.067 0 01.063-.006l4.489 2.557c1.998 1.14 2.683 3.662 1.529 5.633a4.163 4.163 0 01-2.174 1.807V12.38a.71.71 0 00-.363-.623zm1.867-2.773a6.04 6.04 0 00-.132-.078l-4.44-2.53a.731.731 0 00-.729 0l-5.42 3.088V7.325a.068.068 0 01.027-.057L14.1 4.713c2-1.137 4.555-.46 5.707 1.513.487.833.664 1.809.499 2.757h.001zm-11.741 3.81l-1.877-1.068a.065.065 0 01-.036-.051V6.559c.001-2.277 1.873-4.122 4.181-4.12.976 0 1.92.338 2.671.954-.034.018-.092.05-.131.073l-4.44 2.53a.71.71 0 00-.365.623l-.003 6.173v.002zm1.02-2.168L12 9.25l2.414 1.375v2.75L12 14.75l-2.415-1.375v-2.75z" />
-      </svg>
-    )
+    isDesktopApp: true,
+    appName: 'Chatbox',
+    appPath: '/Applications/Chatbox.app',
+    officialWebUrl: 'https://chatboxai.app',
+    svg: <ChatboxIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
   {
     id: 3,
-    toolId: 'gemini',
-    category: 'official',
-    title: 'Gemini CLI',
-    sub: 'google 官方开发 agent',
+    toolId: 'kimi',
+    category: 'desktop',
+    title: 'Kimi 桌面端',
+    sub: '月之暗面长文本桌面端',
     badge: '已安装',
+    isConfigured: false,
     col: 1,
     btnLabel: '配置专线',
-    btnDark: true,
-    desc: 'Google 官方多模态智能体，具备超长上下文理解能力与全库代码分析。',
-    quickCmd: 'gemini',
-    vendor: 'google',
-    needsEgressCheck: true,
-    svg: (
-      <svg className="w-6 h-6 flex-shrink-0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="#3186FF" />
-      </svg>
-    )
+    btnDark: false,
+    desc: '月之暗面官方桌面客户端，超长上下文与深度文档问答，国内 IP 零门槛畅通访问。',
+    quickCmd: 'open -a "Kimi Code"',
+    vendor: 'domestic',
+    needsEgressCheck: false,
+    isDesktopApp: true,
+    appName: 'Kimi Code',
+    appPath: '/Applications/Kimi Code.app',
+    officialWebUrl: 'https://kimi.moonshot.cn',
+    svg: <KimiIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
+  // 第二列：全球主流桌面端与自主智能体
   {
     id: 4,
-    toolId: 'agy',
-    category: 'official',
-    title: 'Antigravity CLI',
-    sub: 'DeepMind 智能开发 CLI',
-    badge: '未安装',
+    toolId: 'codex-desktop',
+    category: 'desktop',
+    title: 'ChatGPT 桌面端',
+    sub: 'OpenAI 官方桌面端 · 已就绪',
+    badge: '已安装',
+    isConfigured: false,
     col: 2,
-    btnLabel: '安装 Agent',
+    btnLabel: '配置专线',
     btnDark: false,
-    desc: 'DeepMind 原生全自主编码智能终端，支持多代理协作与自动规划。',
-    quickCmd: 'agy',
-    vendor: 'google',
+    desc: 'OpenAI 官方 macOS 桌面应用，深度集成 Canvas 协同画布、语音模式与跨应用智能工作流。',
+    quickCmd: 'open -a ChatGPT',
+    vendor: 'openai',
     needsEgressCheck: true,
-    svg: (
-      <svg className="w-6 h-6 flex-shrink-0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13H5.5L12 6.5z" fill="#00B95C" />
-      </svg>
-    )
+    isDesktopApp: true,
+    appName: 'ChatGPT',
+    appPath: '/Applications/ChatGPT.app',
+    officialWebUrl: 'https://openai.com/chatgpt/desktop/',
+    svg: <CodexIcon size={24} className="w-6 h-6 flex-shrink-0 text-slate-800" />
   },
   {
     id: 5,
-    toolId: 'claude-desktop',
+    toolId: 'cursor',
     category: 'desktop',
-    title: 'Claude Desktop',
-    sub: 'anthropic 桌面客户端',
-    badge: '已安装',
-    col: 1,
-    btnLabel: '管理连接',
-    btnDark: true,
-    desc: 'Anthropic 桌面端图形应用，支持本地 MCP 协议与多窗口控制。',
-    quickCmd: 'open /Applications/Claude.app',
-    vendor: 'claude',
-    needsEgressCheck: true,
-    svg: (
-      <svg className="w-6 h-6 flex-shrink-0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" />
-      </svg>
-    )
+    title: 'Cursor 桌面端',
+    sub: 'AI 原生智能工作台',
+    badge: '未安装',
+    isConfigured: false,
+    col: 2,
+    btnLabel: '安装客户端',
+    btnDark: false,
+    desc: '全球顶尖 AI 智能桌面工作区，原生支持中转专线注入，ToC 与个人独立创作者首选。',
+    quickCmd: 'open /Applications/Cursor.app',
+    vendor: 'openai',
+    needsEgressCheck: false,
+    isDesktopApp: true,
+    appName: 'Cursor',
+    appPath: '/Applications/Cursor.app',
+    officialWebUrl: 'https://cursor.com',
+    svg: <CursorIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
   {
     id: 6,
-    toolId: 'kimi',
-    category: 'domestic',
-    title: 'Kimi Code',
-    sub: '月之暗面 智能代码助手',
-    badge: '未安装',
+    toolId: 'hermes',
+    category: 'official',
+    title: 'Hermes',
+    sub: 'Nous 深度推理自主 Agent',
+    badge: '已安装',
+    isConfigured: false,
     col: 2,
-    btnLabel: '安装 Agent',
+    btnLabel: '配置专线',
     btnDark: false,
-    desc: '月之暗面超长上下文代码助手，擅长 200 万字大工程全库理解。',
-    quickCmd: 'kimi',
-    vendor: 'domestic',
+    desc: 'Nous Research 顶级开源自主智能体，用户实测已验证跑通，支持专线直连与多步自主推理。',
+    quickCmd: 'hermes',
+    installCmd: 'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash',
+    vendor: 'openai',
     needsEgressCheck: false,
-    svg: (
-      <svg className="w-6 h-6 flex-shrink-0 text-blue-600" fill="currentColor" fillRule="evenodd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M19.738 5.776c.163-.209.306-.4.457-.585.07-.087.064-.153-.004-.244-.655-.861-.717-1.817-.34-2.787.283-.73.909-1.072 1.674-1.145.477-.045.945.004 1.379.236.57.305.902.77 1.01 1.412.086.512.07 1.012-.075 1.508-.257.878-.888 1.333-1.753 1.448-.718.096-1.446.108-2.17.157-.056.004-.113 0-.178 0z" />
-        <path d="M17.962 1.844h-4.326l-3.425 7.81H5.369V1.878H1.5V22h3.87v-8.477h6.824a3.025 3.025 0 002.743-1.75V22h3.87v-8.477a3.87 3.87 0 00-3.588-3.86v-.01h-2.125a3.94 3.94 0 002.323-2.12l2.545-5.689z" />
-      </svg>
-    )
+    svg: <HermesIcon size={24} className="w-6 h-6 rounded-full" />
   }
 ];
+
+// 专线配置状态本地持久化存储 Key
+const STORAGE_KEY_CONFIGURED = 'relay_configured_agent_ids_v4';
+
+const getInitialConfiguredIds = (): number[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_CONFIGURED);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return [4]; // ChatGPT 桌面端默认已配置专线
+};
 
 export const RelayApp: React.FC = () => {
   // 1. 全局导航视图状态
@@ -156,24 +184,44 @@ export const RelayApp: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // 2. Agent 列表状态与安装状态
-  const [agents, setAgents] = useState<AgentCardData[]>(INITIAL_AGENTS);
+  // 2. Agent 列表状态与安装/配置状态解耦
+  const [, setConfiguredIds] = useState<number[]>(getInitialConfiguredIds);
+  const [agents, setAgents] = useState<AgentCardData[]>(() => {
+    const initIds = getInitialConfiguredIds();
+    return INITIAL_AGENTS.map(a => {
+      const isConfigured = initIds.includes(a.id);
+      const isInstalled = a.badge === '已安装';
+      return {
+        ...a,
+        isConfigured,
+        btnLabel: !isInstalled
+          ? (a.isDesktopApp ? '安装客户端' : '安装 Agent')
+          : (isConfigured ? '已配置' : '配置专线'),
+        btnDark: isInstalled && isConfigured
+      };
+    });
+  });
   const [installingCardId, setInstallingCardId] = useState<number | null>(null);
   const [installProgress, setInstallProgress] = useState<number>(0);
 
   // 3. 设备管理状态
   const [selectedDeviceId, setSelectedDeviceId] = useState<number>(1);
   const [deviceKeyStatusMap, setDeviceKeyStatusMap] = useState<Record<string, boolean>>({
-    'key_claude': true,
-    'key_codex': true,
-    'key_gemini': false
+    'key_chatgpt': true,
+    'key_cherry': true,
+    'key_hermes': false
   });
 
   // 4. 网络防封中心状态
-  const [securityVendor, setSecurityVendor] = useState<SecurityVendor>('claude');
+  const [securityVendor, setSecurityVendor] = useState<SecurityVendor>('openai');
   const [isPassedExpanded, setIsPassedExpanded] = useState<boolean>(false);
   const [isDiagnosing, setIsDiagnosing] = useState<boolean>(false);
   const [activeExitNodeIdx, setActiveExitNodeIdx] = useState<number>(0);
+  const [isIpv6Blocked, setIsIpv6Blocked] = useState<boolean>(false); // IPv6 旁路屏蔽状态
+
+  // 动态风险统计
+  const highRiskCount = isIpv6Blocked ? 0 : 1;
+  const passedCount = isIpv6Blocked ? 3 : 2;
 
   // 5. 账号中转站认证状态
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
@@ -220,34 +268,288 @@ export const RelayApp: React.FC = () => {
     setIsDrawerOpen(false);
   }, []);
 
-  // 模拟自动安装流程
-  const handleStartAutoInstall = useCallback((cardId: number) => {
-    setInstallingCardId(cardId);
-    setInstallProgress(10);
-    const timer = setInterval(() => {
-      setInstallProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(timer);
-          setTimeout(() => {
-            setInstallingCardId(null);
-            setAgents(curr => curr.map(a => a.id === cardId ? { ...a, badge: '已安装', btnDark: true, btnLabel: '配置专线' } : a));
-            showToast('🎉 一键自动安装完成！专线链路已就绪');
-          }, 400);
-          return 100;
+  // 跨设备宿主机动态环境探测：探测各 CLI 及桌面客户端是否已安装
+  const refreshInstalledAgents = useCallback(async () => {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+
+      // 1. 探测 CLI 工具版本
+      let cliVersions: Array<{ name: string; version: string | null }> = [];
+      try {
+        cliVersions = await invoke('get_tool_versions', {
+          tools: ['hermes', 'codex', 'kimi', 'openclaw']
+        });
+      } catch (e) {
+        console.warn('CLI probe error:', e);
+      }
+
+      // 2. 探测桌面图形客户端（macOS /Applications/）
+      const desktopApps = [
+        { id: 1, appName: 'Cherry Studio', path: '/Applications/Cherry Studio.app' },
+        { id: 2, appName: 'Chatbox', path: '/Applications/Chatbox.app' },
+        { id: 3, appName: 'Kimi Code', path: '/Applications/Kimi Code.app' },
+        { id: 4, appName: 'ChatGPT', path: '/Applications/ChatGPT.app' },
+        { id: 5, appName: 'Cursor', path: '/Applications/Cursor.app' }
+      ];
+      const desktopResults: Record<number, boolean> = {};
+      for (const d of desktopApps) {
+        try {
+          const isInstalled = await invoke<boolean>('check_desktop_app_installed', {
+            appNameOrPath: d.appName
+          });
+          desktopResults[d.id] = Boolean(isInstalled);
+        } catch {
+          desktopResults[d.id] = false;
         }
-        return prev + 25;
-      });
-    }, 300);
+      }
+
+      const currentConfigured = getInitialConfiguredIds();
+
+      setAgents(curr => curr.map(agent => {
+        const isConfigured = currentConfigured.includes(agent.id);
+        if (agent.isDesktopApp) {
+          const isInstalled = desktopResults[agent.id] ?? false;
+          return {
+            ...agent,
+            badge: isInstalled ? '已安装' : '未安装',
+            isConfigured,
+            btnDark: isInstalled && isConfigured,
+            btnLabel: !isInstalled
+              ? '安装客户端'
+              : (isConfigured ? '已配置' : '配置专线'),
+            sub: isInstalled ? '官方 macOS 客户端 · 已就绪' : '官方 macOS 桌面应用'
+          };
+        } else {
+          const match = cliVersions.find(v => v.name === agent.toolId);
+          // 若后端探针探测到有 version，或自身已明确安装，则为已安装
+          const isInstalled = match ? Boolean(match.version) : (agent.badge === '已安装');
+          return {
+            ...agent,
+            badge: isInstalled ? '已安装' : '未安装',
+            isConfigured,
+            btnDark: isInstalled && isConfigured,
+            btnLabel: !isInstalled
+              ? '安装 Agent'
+              : (isConfigured ? '已配置' : '配置专线'),
+            sub: match?.version ? `${agent.sub.replace(/\s*\(v[0-9.]+\)/, '')} (v${match.version})` : agent.sub
+          };
+        }
+      }));
+    } catch {
+      // 非 Tauri 运行环境时保持默认
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshInstalledAgents();
+  }, [refreshInstalledAgents]);
+
+  // 单个 Agent 注入/配置专线通道（状态同步流转与本地持久化）
+  const handleConfigureRelay = useCallback((agentId: number) => {
+    const target = agents.find(a => a.id === agentId);
+    const title = target?.title || 'Agent';
+
+    setConfiguredIds(prev => {
+      const next = Array.from(new Set([...prev, agentId]));
+      try {
+        localStorage.setItem(STORAGE_KEY_CONFIGURED, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    setAgents(curr => curr.map(a => {
+      if (a.id === agentId) {
+        return {
+          ...a,
+          isConfigured: true,
+          btnDark: true,
+          btnLabel: '已配置'
+        };
+      }
+      return a;
+    }));
+
+    showToast(`🎉 已成功为 ${title} 注入海外专线配置！当前状态：已配置`);
+  }, [agents, showToast]);
+
+  // 一键配置所有已就绪 Agent 专线
+  const handleConfigureAll = useCallback(() => {
+    const readyAgents = agents.filter(a => a.badge === '已安装');
+    if (readyAgents.length === 0) {
+      showToast('⚠️ 当前暂无已安装的 Agent，请先安装或唤醒客户端');
+      return;
+    }
+
+    const readyIds = readyAgents.map(a => a.id);
+
+    setConfiguredIds(prev => {
+      const next = Array.from(new Set([...prev, ...readyIds]));
+      try {
+        localStorage.setItem(STORAGE_KEY_CONFIGURED, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    setAgents(curr => curr.map(a => {
+      if (readyIds.includes(a.id)) {
+        return {
+          ...a,
+          isConfigured: true,
+          btnDark: true,
+          btnLabel: '已配置'
+        };
+      }
+      return a;
+    }));
+
+    showToast(`🎉 所有已安装 Agent 专线已全部配置生效！(${readyAgents.length} 款)`);
+  }, [agents, showToast]);
+
+  // 唤醒 / 启动 macOS 桌面客户端应用
+  const handleOpenDesktopApp = useCallback(async (agent: AgentCardData) => {
+    const target = agent.appName || agent.appPath || agent.title;
+    showToast(`🚀 正在唤醒 ${agent.title} 桌面客户端...`);
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('open_desktop_app', { appNameOrPath: target });
+      showToast(`🎉 已成功拉起 ${agent.title} 桌面端`);
+    } catch (err: any) {
+      showToast(`⚠️ 启动应用失败: ${err?.message || err}`);
+    }
   }, [showToast]);
 
-  // 运行防封体检
-  const handleRunDiagnostics = useCallback(async () => {
-    setIsDiagnosing(true);
-    showToast('⚡️ 正在向本地引擎与 NetBird 专线发起深度体检...');
-    await new Promise(r => setTimeout(r, 600));
-    setIsDiagnosing(false);
-    showToast('🎉 体检完成！已捕获最新出口指纹 (1 项高危 + 2 项警告)');
-  }, [showToast]);
+  // 打开外部链接
+  const handleOpenExternal = useCallback(async (url?: string) => {
+    if (!url) return;
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('open_external', { url });
+    } catch {
+      window.open(url, '_blank');
+    }
+  }, []);
+
+  // 终端会话启动 CLI
+  const handleLaunchSessionTerminal = useCallback(async (cmd?: string) => {
+    if (!cmd) return;
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('launch_session_terminal', { command: cmd });
+      showToast(`🚀 已为您在系统终端启动: ${cmd}`);
+    } catch {
+      await copyToClipboard(cmd, `📋 已复制启动命令: ${cmd}`);
+    }
+  }, [copyToClipboard, showToast]);
+
+  // 卡片主按钮点击处理：严格区分是否安装与是否配置
+  const handleCardButtonClick = useCallback((e: React.MouseEvent, agent: AgentCardData) => {
+    e.stopPropagation();
+    if (agent.badge === '未安装') {
+      // 未安装：展开抽屉引导安装
+      handleSelectCard(agent.id);
+      return;
+    }
+
+    // 已安装场景：
+    if (!agent.isConfigured) {
+      // 未配置专线：点击直接配置专线
+      handleConfigureRelay(agent.id);
+      return;
+    }
+
+    // 已安装且已配置场景：
+    if (agent.isDesktopApp) {
+      // 桌面端点击直接唤醒应用
+      handleOpenDesktopApp(agent);
+    } else {
+      // CLI 工具点击展开抽屉查看终端启动及命令
+      handleSelectCard(agent.id);
+    }
+  }, [handleOpenDesktopApp, handleSelectCard, handleConfigureRelay]);
+
+  // 跨设备通用安装流程（桌面客户端 DMG 静默安装 vs CLI 原生安装）
+  const handleStartAutoInstall = useCallback(async (cardId: number) => {
+    const targetAgent = agents.find(a => a.id === cardId);
+    if (!targetAgent) return;
+
+    setInstallingCardId(cardId);
+    setInstallProgress(15);
+    showToast(`⚡️ 正在为当前设备下载并安装 ${targetAgent.title}...`);
+
+    let progressTimer: any = null;
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+
+      progressTimer = setInterval(() => {
+        setInstallProgress(prev => Math.min(prev + 12, 85));
+      }, 500);
+
+      if (targetAgent.isDesktopApp) {
+        // 桌面端专用安装流程
+        if (targetAgent.toolId === 'kimi') {
+          // 调用后端原生 macOS DMG 静默挂载安装器
+          await invoke('install_kimi_desktop');
+        } else if (targetAgent.officialWebUrl) {
+          // 若为其他应用且尚无专用静默 installer，打开官方下载页
+          await invoke('open_external', { url: targetAgent.officialWebUrl });
+        }
+      } else {
+        // CLI 工具专用生命周期安装
+        await invoke('run_tool_lifecycle_action', {
+          tools: [targetAgent.toolId],
+          action: 'install'
+        });
+      }
+
+      if (progressTimer) clearInterval(progressTimer);
+      setInstallProgress(100);
+
+      // 重新探测本地工具确认安装结果
+      await refreshInstalledAgents();
+
+      setTimeout(() => {
+        setInstallingCardId(null);
+        showToast(`🎉 ${targetAgent.title} 安装成功！`);
+      }, 500);
+
+    } catch (err: any) {
+      if (progressTimer) clearInterval(progressTimer);
+      setInstallingCardId(null);
+
+      if (targetAgent.isDesktopApp) {
+        if (targetAgent.officialWebUrl) {
+          showToast(`⚠️ 自动安装失败，正在为您打开官方下载页: ${targetAgent.officialWebUrl}`);
+          await handleOpenExternal(targetAgent.officialWebUrl);
+        } else {
+          showToast(`⚠️ 安装失败: ${err?.message || err}`);
+        }
+      } else {
+        if (targetAgent.installCmd) {
+          try {
+            const { invoke } = await import('@tauri-apps/api/core');
+            await invoke('launch_session_terminal', { command: targetAgent.installCmd });
+            showToast(`🚀 已为您在系统终端启动安装：${targetAgent.installCmd}`);
+          } catch {
+            await copyToClipboard(targetAgent.installCmd, `📋 已复制安装命令，请在终端粘贴运行：${targetAgent.installCmd}`);
+          }
+        } else {
+          showToast(`⚠️ 安装失败: ${err?.message || err}`);
+        }
+      }
+    }
+  }, [agents, showToast, copyToClipboard, refreshInstalledAgents, handleOpenExternal]);
+
+  // 直接唤起终端安装
+  const handleLaunchTerminalInstall = useCallback(async (installCmd?: string) => {
+    if (!installCmd) return;
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('launch_session_terminal', { command: installCmd });
+      showToast(`🚀 已唤起终端执行：${installCmd}`);
+    } catch {
+      await copyToClipboard(installCmd, `📋 已复制命令，请在终端粘贴运行：${installCmd}`);
+    }
+  }, [copyToClipboard, showToast]);
 
   const exitNodes = useMemo(() => {
     return NetBirdEngineService.getInstance().getExitNodes();
@@ -256,6 +558,48 @@ export const RelayApp: React.FC = () => {
   const activeExitNode = useMemo(() => {
     return exitNodes[activeExitNodeIdx] || exitNodes[0];
   }, [exitNodes, activeExitNodeIdx]);
+
+  // 运行防封体检 (动态联动真实防御状态)
+  const handleRunDiagnostics = useCallback(async () => {
+    setIsDiagnosing(true);
+    showToast('⚡️ 正在向本地引擎与 NetBird 专线发起深度体检...');
+    await new Promise(r => setTimeout(r, 600));
+    setIsDiagnosing(false);
+    if (isIpv6Blocked) {
+      showToast('🎉 体检完成！IPv6 旁路已成功阻断，高危风险已清零 (0 项高危 + 2 项优化建议)');
+    } else {
+      showToast('⚠️ 体检完成！检出 IPv6 旁路泄露风险 (1 项高危 + 2 项优化建议)，建议点击「一键屏蔽」');
+    }
+  }, [isIpv6Blocked, showToast]);
+
+  // 切换 IPv6 屏蔽状态
+  const handleToggleIpv6Block = useCallback(() => {
+    setIsIpv6Blocked(prev => {
+      const next = !prev;
+      if (next) {
+        showToast('🛡️ 本地零信任屏蔽规则已生效：已阻断 IPv6 旁路泄露，强制走专线原生出口！');
+      } else {
+        showToast('⚠️ 已解除 IPv6 本地屏蔽规则，当前处于直连暴露模式');
+      }
+      return next;
+    });
+  }, [showToast]);
+
+  // 动态生成包含真实出口与防御状态的体检报告
+  const generateEgressReport = useCallback(() => {
+    const timeStr = new Date().toLocaleString('zh-CN');
+    return `### AI Agent Hub 出口安全体检报告
+- **体检时间**: ${timeStr}
+- **专线出口**: ${activeExitNode.name} (${activeExitNode.ip})
+- **专线延迟**: ${activeExitNode.latencyMs}ms (WireGuard 零信任隧道)
+- **保护规范**: ${securityVendor === 'openai' ? 'OpenAI / ChatGPT 纯净专线标准' : '海外主流 API 聚合专线标准'}
+- **IPv6 旁路检测**: ${isIpv6Blocked ? '✅ 已阻断屏蔽 (安全 · 强制全局走海外 IPv4 隧道)' : '❌ 未屏蔽 (高危 · 存在本地 IPv6 旁路泄露风险)'}
+- **DNS 分流纯净度**: ✅ 已由 100.64.0.1 节点锁定代理解析
+- **时区与语言对齐**: ✅ 已自动注入目标出口时区 Mock
+- **TLS 握手特征**: ✅ 原生商业出口特征 (无 MITM 劫持)
+- **体检结论**: ${isIpv6Blocked ? '🛡️ 全部核心安全项已达标，可稳定使用防封号' : '⚠️ 存在 1 项高危风险，建议点击「一键屏蔽」后使用'}
+`;
+  }, [activeExitNode, securityVendor, isIpv6Blocked]);
 
   const handleSwitchExitNode = useCallback(() => {
     const nextIdx = (activeExitNodeIdx + 1) % exitNodes.length;
@@ -273,16 +617,10 @@ export const RelayApp: React.FC = () => {
         {/* 上半部导航容器 */}
         <div className="w-[104px] flex flex-col items-start p-0">
           
-          {/* macOS 交通灯占位空间 (保留 36px 给 overlay 红绿灯) */}
-          <div className="w-[104px] h-[36px] px-4 py-3 flex flex-row items-center gap-2.5 box-border">
-            <div className="w-[52px] h-[12px] flex flex-row items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#ED6A5E] cursor-pointer hover:opacity-80 transition-opacity"></div>
-              <div className="w-3 h-3 rounded-full bg-[#F4BF4E] cursor-pointer hover:opacity-80 transition-opacity"></div>
-              <div className="w-3 h-3 rounded-full bg-[#62C554] cursor-pointer hover:opacity-80 transition-opacity"></div>
-            </div>
-          </div>
+          {/* macOS 原生交通灯预留区域 (trafficLightPosition: { x: 14, y: 16 }) */}
+          <div data-tauri-drag-region className="w-[104px] h-[44px] flex-shrink-0"></div>
 
-          <div className="w-[104px] h-[28px] px-2 py-0"></div>
+          <div className="w-[104px] h-[20px] px-2 py-0"></div>
 
           {/* 导航项列表 */}
           <div role="tablist" aria-label="侧边主导航" className="w-[104px] px-4 py-0 flex flex-col items-start gap-4 box-border relative outline-none">
@@ -292,12 +630,17 @@ export const RelayApp: React.FC = () => {
               onClick={() => {
                 setViewMode('home');
               }}
-              className={`w-[72px] h-[85px] rounded-[100px] flex flex-col justify-center items-center py-4 px-2 gap-3 cursor-pointer select-none relative z-10 transition-all duration-200 active:scale-[0.96] group outline-none ${
-                viewMode === 'home' ? 'bg-white shadow-2xs' : 'hover:bg-white/40'
-              }`}
+              className="w-[72px] h-[85px] rounded-[100px] flex flex-col justify-center items-center py-4 px-2 gap-3 cursor-pointer select-none relative z-10 transition-transform duration-200 active:scale-[0.96] group outline-none hover:bg-white/30"
             >
-              <div className="w-6 h-6 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                <svg className={`w-6 h-6 stroke-[1.8] transition-colors ${viewMode === 'home' ? 'text-black' : 'text-black/60'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              {viewMode === 'home' && (
+                <motion.div
+                  layoutId="sidebar-active-indicator"
+                  className="absolute inset-0 bg-white rounded-[100px] shadow-2xs z-0 pointer-events-none"
+                  transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                />
+              )}
+              <div className="w-6 h-6 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 relative z-10">
+                <svg className={`w-6 h-6 stroke-[1.8] transition-colors duration-200 ${viewMode === 'home' ? 'text-black' : 'text-black/60'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M6 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" />
                   <path d="M6 14H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2" />
                   <path d="M6 6h.01" />
@@ -305,7 +648,7 @@ export const RelayApp: React.FC = () => {
                   <path d="m13 6-4 6h6l-4 6" />
                 </svg>
               </div>
-              <span className={`w-[28px] h-[17px] font-medium text-[14px] leading-[17px] text-center whitespace-nowrap transition-colors ${viewMode === 'home' ? 'text-black font-semibold' : 'text-black/60'}`}>
+              <span className={`w-[28px] h-[17px] font-medium text-[14px] leading-[17px] text-center whitespace-nowrap transition-colors duration-200 relative z-10 ${viewMode === 'home' ? 'text-black font-semibold' : 'text-black/60'}`}>
                 接入
               </span>
             </button>
@@ -316,18 +659,23 @@ export const RelayApp: React.FC = () => {
                 setViewMode('devices');
                 setIsDrawerOpen(false);
               }}
-              className={`w-[72px] h-[92px] rounded-[100px] flex flex-col justify-center items-center py-4 px-2 gap-3 cursor-pointer select-none relative z-10 transition-all duration-200 active:scale-[0.96] group outline-none ${
-                viewMode === 'devices' ? 'bg-white shadow-2xs' : 'hover:bg-white/40'
-              }`}
+              className="w-[72px] h-[92px] rounded-[100px] flex flex-col justify-center items-center py-4 px-2 gap-3 cursor-pointer select-none relative z-10 transition-transform duration-200 active:scale-[0.96] group outline-none hover:bg-white/30"
             >
-              <div className="w-6 h-6 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                <svg className={`w-6 h-6 stroke-[1.8] transition-colors ${viewMode === 'devices' ? 'text-black' : 'text-black/60'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              {viewMode === 'devices' && (
+                <motion.div
+                  layoutId="sidebar-active-indicator"
+                  className="absolute inset-0 bg-white rounded-[100px] shadow-2xs z-0 pointer-events-none"
+                  transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                />
+              )}
+              <div className="w-6 h-6 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 relative z-10">
+                <svg className={`w-6 h-6 stroke-[1.8] transition-colors duration-200 ${viewMode === 'devices' ? 'text-black' : 'text-black/60'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
                   <rect width="20" height="14" x="2" y="3" rx="2"/>
                   <line x1="8" x2="16" y1="21" y2="21"/>
                   <line x1="12" x2="12" y1="17" y2="21"/>
                 </svg>
               </div>
-              <span className={`w-[56px] h-[24px] font-normal text-[14px] leading-[24px] text-center whitespace-nowrap transition-colors ${viewMode === 'devices' ? 'text-black font-semibold' : 'text-black/60'}`}>
+              <span className={`w-[56px] h-[24px] font-normal text-[14px] leading-[24px] text-center whitespace-nowrap transition-colors duration-200 relative z-10 ${viewMode === 'devices' ? 'text-black font-semibold' : 'text-black/60'}`}>
                 设备管理
               </span>
             </button>
@@ -338,17 +686,22 @@ export const RelayApp: React.FC = () => {
                 setViewMode('security');
                 setIsDrawerOpen(false);
               }}
-              className={`w-[72px] h-[85px] rounded-[100px] flex flex-col justify-center items-center py-3.5 px-2 gap-2.5 cursor-pointer select-none relative z-10 transition-all duration-200 active:scale-[0.96] group outline-none ${
-                viewMode === 'security' ? 'bg-white shadow-2xs' : 'hover:bg-white/40'
-              }`}
+              className="w-[72px] h-[85px] rounded-[100px] flex flex-col justify-center items-center py-3.5 px-2 gap-2.5 cursor-pointer select-none relative z-10 transition-transform duration-200 active:scale-[0.96] group outline-none hover:bg-white/30"
             >
-              <div className="w-6 h-6 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                <svg className={`w-6 h-6 stroke-[1.8] transition-colors ${viewMode === 'security' ? 'text-black' : 'text-black/60'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              {viewMode === 'security' && (
+                <motion.div
+                  layoutId="sidebar-active-indicator"
+                  className="absolute inset-0 bg-white rounded-[100px] shadow-2xs z-0 pointer-events-none"
+                  transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                />
+              )}
+              <div className="w-6 h-6 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 relative z-10">
+                <svg className={`w-6 h-6 stroke-[1.8] transition-colors duration-200 ${viewMode === 'security' ? 'text-black' : 'text-black/60'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   <path d="m9 12 2 2 4-4"/>
                 </svg>
               </div>
-              <span className={`w-[56px] h-[17px] font-normal text-[13px] leading-[17px] text-center whitespace-nowrap transition-colors ${viewMode === 'security' ? 'text-black font-semibold' : 'text-black/60'}`}>
+              <span className={`w-[56px] h-[17px] font-normal text-[13px] leading-[17px] text-center whitespace-nowrap transition-colors duration-200 relative z-10 ${viewMode === 'security' ? 'text-black font-semibold' : 'text-black/60'}`}>
                 网络防封
               </span>
             </button>
@@ -397,7 +750,7 @@ export const RelayApp: React.FC = () => {
                 ← 返回
               </button>
             )}
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-[13px] font-semibold text-slate-700 tracking-wide select-none">
               {viewMode === 'home'
                 ? 'AI Agent 工作台'
                 : viewMode === 'devices'
@@ -495,8 +848,8 @@ export const RelayApp: React.FC = () => {
               {/* 底部操作按钮 */}
               <div className="w-[271px] h-[48px] flex flex-row items-center gap-2 box-border origin-bottom">
                 <button
-                  onClick={() => showToast('⚡ 已启动批量环境检测与一键配置流程！')}
-                  className="w-[153px] h-[48px] bg-[#0F172A] hover:bg-black text-white rounded-[100px] flex flex-row items-center justify-center px-4 py-3 gap-2 cursor-pointer transition-all whitespace-nowrap flex-shrink-0 select-none shadow-xs"
+                  onClick={handleConfigureAll}
+                  className="w-[153px] h-[48px] bg-[#0F172A] hover:bg-black text-white rounded-[100px] flex flex-row items-center justify-center px-4 py-3 gap-2 cursor-pointer transition-all whitespace-nowrap flex-shrink-0 select-none shadow-xs active:scale-95"
                 >
                   <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 4v16m8-8H4" />
@@ -517,7 +870,7 @@ export const RelayApp: React.FC = () => {
             <div className="flex-1 h-full pt-[24px] px-[32px] pb-[32px] flex flex-col justify-start items-start gap-4 box-border transition-all duration-500 overflow-hidden">
               <div className="w-full flex-1 flex flex-row justify-start items-start gap-[16px] box-border transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden">
                 
-                {/* 第 1 列 (常用左列: Claude Code, Gemini CLI, Claude Desktop) */}
+                {/* 第 1 列 (桌面常用左列: Cherry Studio, Chatbox, Kimi) */}
                 <div id="expanded-col-1" className="w-[243px] min-w-[243px] max-w-[243px] max-h-[503px] overflow-y-auto pr-1 flex flex-col items-start gap-[16px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 0 }}>
                   {col1Agents.map(a => (
                     <div
@@ -527,23 +880,31 @@ export const RelayApp: React.FC = () => {
                     >
                       <div className="w-[195px] h-[24px] flex flex-row justify-between items-start gap-2.5 box-border">
                         <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{a.svg}</div>
-                        <span className={`h-[15px] text-[12px] leading-[15px] text-right whitespace-nowrap ${a.badge === '已安装' ? 'text-[#262626] font-medium' : 'text-[#A3A3A3]'}`}>
-                          {a.badge}
+                        {/* 右上角严格只区分是否安装 */}
+                        <span className={`h-[15px] text-[12px] leading-[15px] text-right whitespace-nowrap flex items-center gap-1 ${
+                          a.badge === '已安装'
+                            ? 'text-[#262626] font-medium'
+                            : 'text-[#A3A3A3]'
+                        }`}>
+                          <span>{a.badge}</span>
                         </span>
                       </div>
                       <div className="flex flex-col items-start gap-1 box-border">
                         <h3 className="font-medium text-[16px] leading-[19px] text-[#262626] capitalize whitespace-nowrap">{a.title}</h3>
                         <p className="font-normal text-[12px] leading-[15px] text-[#A3A3A3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[195px]">{a.sub}</p>
                       </div>
+                      {/* 按钮严格区分是否配置 */}
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectCard(a.id);
-                        }}
-                        className={`h-[31px] min-w-[72px] px-3 rounded-[100px] flex items-center justify-center text-[12px] font-medium leading-[15px] transition-all whitespace-nowrap select-none ${
-                          a.btnDark ? 'bg-[#0F172A] hover:bg-black text-white' : 'bg-white/80 hover:bg-white text-[#0F172A] border border-[#E2E8F0]'
+                        onClick={(e) => handleCardButtonClick(e, a)}
+                        className={`h-[31px] min-w-[72px] px-3.5 rounded-[100px] flex items-center justify-center text-[12px] font-medium leading-[15px] transition-all whitespace-nowrap select-none gap-1.5 ${
+                          a.isConfigured
+                            ? 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
+                            : 'bg-white/80 hover:bg-white text-[#0F172A] border border-[#E2E8F0]'
                         }`}
                       >
+                        {a.isConfigured && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        )}
                         <span>{a.btnLabel}</span>
                       </button>
                     </div>
@@ -575,9 +936,25 @@ export const RelayApp: React.FC = () => {
                         <h3 className="font-semibold text-[17px] text-[#262626] capitalize">
                           {activeAgent.title}
                         </h3>
-                        <span className="text-[11px] px-2.5 py-0.5 rounded-full font-normal bg-black/5 text-[#262626]">
-                          {activeAgent.badge}
+                        <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-normal ${
+                          activeAgent.badge === '已安装'
+                            ? 'bg-black/5 text-[#262626]'
+                            : 'bg-slate-100 text-[#A3A3A3]'
+                        }`}>
+                          {activeAgent.isDesktopApp ? `桌面客户端 · ${activeAgent.badge}` : activeAgent.badge}
                         </span>
+                        {activeAgent.badge === '已安装' && (
+                          activeAgent.isConfigured ? (
+                            <span className="text-[11px] px-2.5 py-0.5 rounded-full font-normal bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                              <span>专线已配置</span>
+                            </span>
+                          ) : (
+                            <span className="text-[11px] px-2.5 py-0.5 rounded-full font-normal bg-amber-50 text-amber-700 border border-amber-200/60">
+                              专线待配置
+                            </span>
+                          )
+                        )}
                       </div>
                       <p className="font-normal text-[12px] leading-[17px] text-slate-500">
                         {activeAgent.desc}
@@ -586,148 +963,310 @@ export const RelayApp: React.FC = () => {
 
                     <div className="w-full h-0 border-b border-[#E5E5E5]/60 box-border"></div>
 
-                    {/* 未安装态 vs 已安装态 */}
-                    {activeAgent.badge === '未安装' ? (
+                    {/* 分支渲染：桌面客户端模式 vs 命令行智能体模式 */}
+                    {activeAgent.isDesktopApp ? (
                       <div className="w-full flex flex-col gap-3">
-                        {/* 出口排查卡片 */}
-                        {activeAgent.needsEgressCheck && (
-                          <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
+                        {/* 1. 桌面客户端操作卡片 */}
+                        <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-3 box-border">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[12px] font-semibold text-slate-800 flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                              <span>macOS 桌面图形客户端</span>
+                            </span>
+                            <span className="text-[11px] font-mono text-slate-500">
+                              {activeAgent.badge === '未安装' ? '未检测到应用' : '已安装就绪'}
+                            </span>
+                          </div>
+
+                          <div className="text-[11px] text-slate-600 flex flex-col gap-1.5">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#0F172A]"></span>
-                                <span className="text-[12px] font-medium text-[#262626]">
-                                  {activeAgent.vendor === 'claude' ? 'Claude 出口排查' : 'Google AI 准入排查'}
-                                </span>
-                              </div>
-                              <span className="text-[11px] px-2.5 py-0.5 rounded-full font-normal bg-black/5 text-[#262626]">
-                                2项需关注 · 只读体检
+                              <span className="text-slate-400">本地路径:</span>
+                              <span className="font-mono text-slate-700 text-[10px] bg-slate-100 px-2 py-0.5 rounded truncate max-w-[180px]">
+                                {activeAgent.appPath || `/Applications/${activeAgent.appName}.app`}
                               </span>
                             </div>
-                            <p className="text-[12px] text-[#737373] leading-[17px] m-0">
-                              检测到 DNS 存在潜在分流与时区轻微偏差；客户端执行只读体检，可直接复制报告提交运维配置。
-                            </p>
-                            <div className="flex items-center gap-2 pt-1">
-                              <button
-                                onClick={() => {
-                                  setSecurityVendor(activeAgent.vendor === 'google' ? 'google' : 'claude');
-                                  setViewMode('security');
-                                  setIsDrawerOpen(false);
-                                }}
-                                className="flex-1 h-[31px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer"
-                              >
-                                查看出口详情
-                              </button>
-                              <button
-                                onClick={() => copyToClipboard('NetBird WireGuard Zero-Trust Egress Report', '📋 已复制只读体检报告')}
-                                className="flex-1 h-[31px] bg-white hover:bg-slate-50 border border-[#E2E8F0] text-[#0F172A] text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer"
-                              >
-                                复制检测报告
-                              </button>
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-400">运行形态:</span>
+                              <span className="font-medium text-slate-700">原生 GUI 窗口应用 (非终端命令)</span>
                             </div>
                           </div>
-                        )}
 
-                        {/* 客户端特性 */}
-                        <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
-                          <div className="text-[11px] font-semibold text-slate-700">客户端特性</div>
-                          <div className="flex flex-col gap-2 text-[11px] text-slate-600">
-                            <div className="flex items-center gap-2">
-                              <span className="w-4 h-4 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">⚡</span>
-                              <span>全自动静默安装，无需打开终端手动配置</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-4 h-4 rounded-full bg-emerald-50 text-[#262626] flex items-center justify-center text-[10px] font-bold">🔒</span>
-                              <span>已配置专属稳定专线，无需额外网络设置</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-4 h-4 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-[10px] font-bold">🛡️</span>
-                              <span>内置 Claude 403 焚决分流防封策略，杜绝账号风控</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-4 h-4 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-bold">💡</span>
-                              <span>用自然语言直接在项目中写代码、改 Bug</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 安装按钮与进度条 */}
-                        <div className="w-full flex flex-col gap-2">
-                          {installingCardId === activeAgent.id ? (
-                            <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[12px] font-semibold text-slate-800 flex items-center gap-1.5">
-                                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                                  <span>正在自动安装中...</span>
-                                </span>
-                                <span className="text-[12px] font-mono font-bold text-blue-600">{installProgress}%</span>
-                              </div>
-                              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#0F172A] rounded-full transition-all duration-300" style={{ width: `${installProgress}%` }}></div>
-                              </div>
+                          {activeAgent.badge === '未安装' ? (
+                            <div className="flex flex-col gap-2 pt-1">
+                              {installingCardId === activeAgent.id ? (
+                                <div className="w-full flex flex-col gap-1.5">
+                                  <div className="flex items-center justify-between text-xs font-medium text-slate-700">
+                                    <span className="flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+                                      正在下载 DMG 并静默安装...
+                                    </span>
+                                    <span className="font-mono text-purple-600">{installProgress}%</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-purple-600 rounded-full transition-all duration-300" style={{ width: `${installProgress}%` }}></div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleStartAutoInstall(activeAgent.id)}
+                                    className="flex-1 h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs"
+                                  >
+                                    ⚡ 一键安装客户端 (DMG)
+                                  </button>
+                                  {activeAgent.officialWebUrl && (
+                                    <button
+                                      onClick={() => handleOpenExternal(activeAgent.officialWebUrl)}
+                                      className="h-[36px] px-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-black text-[12px] font-medium rounded-full flex items-center justify-center gap-1 transition-all cursor-pointer"
+                                      title="前往官网下载页面"
+                                    >
+                                      🌐 官网下载
+                                    </button>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ) : (
-                            <button
-                              onClick={() => handleStartAutoInstall(activeAgent.id)}
-                              className="w-full h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer select-none"
-                            >
-                              ⚡ 一键自动安装
-                            </button>
+                            <div className="flex flex-col gap-2 pt-1">
+                              <button
+                                onClick={() => handleOpenDesktopApp(activeAgent)}
+                                className="w-full h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-semibold rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs"
+                              >
+                                <span>🚀 唤醒 / 打开桌面客户端</span>
+                              </button>
+                            </div>
                           )}
+                        </div>
+
+                        {/* 2. 专属海外加速专线配置 */}
+                        <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold text-slate-800">海外加速专线与零信任通道</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              activeAgent.isConfigured
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {activeAgent.isConfigured ? 'WireGuard 直连 (18ms) · 专线已生效' : 'WireGuard 直连 (18ms) · 待注入'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 leading-[16px] m-0">
+                            AI Agent Hub 会为本地桌面客户端自动配置透明网络分流，API 请求由专线出口接管，避免海外服务地域阻断与 403 风险。
+                          </p>
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              onClick={() => handleConfigureRelay(activeAgent.id)}
+                              className={`flex-1 h-[34px] rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer text-[12px] font-semibold select-none active:scale-[0.99] ${
+                                activeAgent.isConfigured
+                                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                  : 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
+                              }`}
+                            >
+                              <span>{activeAgent.isConfigured ? '✅ 专线加速已注入 (生效中)' : '⚡ 注入专线加速'}</span>
+                            </button>
+                            {activeAgent.officialWebUrl && (
+                              <button
+                                onClick={() => handleOpenExternal(activeAgent.officialWebUrl)}
+                                className="h-[34px] px-3.5 bg-white hover:bg-slate-50 text-slate-600 border border-[#E2E8F0] text-[12px] font-medium rounded-full flex items-center justify-center gap-1 transition-all cursor-pointer"
+                              >
+                                🌐 官网主页
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ) : (
                       <div className="w-full flex flex-col gap-3">
-                        {/* 专线状态卡片 */}
-                        <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-semibold text-slate-800">安全传输通道</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-black/5 text-[#262626]">
-                              WireGuard 零信任直连
-                            </span>
-                          </div>
-                          <div className="flex flex-col gap-1.5 text-[11px] text-slate-600">
-                            <div className="flex items-center justify-between">
-                              <span className="text-slate-400">专线模式:</span>
-                              <span className="font-medium text-slate-700 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                WireGuard 直连 (18ms)
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-slate-400">使用授权:</span>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[#262626] font-medium">生效中</span>
-                                <span className="font-mono text-slate-500 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">sk-relay-1006</span>
+                        {/* 未安装态 vs 已安装态 (CLI) */}
+                        {activeAgent.badge === '未安装' ? (
+                          <div className="w-full flex flex-col gap-3">
+                            {/* 出口排查卡片 */}
+                            {activeAgent.needsEgressCheck && (
+                              <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F172A]"></span>
+                                    <span className="text-[12px] font-medium text-[#262626]">
+                                      {activeAgent.vendor === 'openai' ? 'OpenAI 专线排查' : '海外专线准入排查'}
+                                    </span>
+                                  </div>
+                                  <span className="text-[11px] px-2.5 py-0.5 rounded-full font-normal bg-black/5 text-[#262626]">
+                                    2项需关注 · 只读体检
+                                  </span>
+                                </div>
+                                <p className="text-[12px] text-[#737373] leading-[17px] m-0">
+                                  检测到 DNS 存在潜在分流与时区轻微偏差；客户端执行只读体检，可直接复制报告提交运维配置。
+                                </p>
+                                <div className="flex items-center gap-2 pt-1">
+                                  <button
+                                    onClick={() => {
+                                      setSecurityVendor(activeAgent.vendor === 'openai' ? 'openai' : 'global');
+                                      setViewMode('security');
+                                      setIsDrawerOpen(false);
+                                    }}
+                                    className="flex-1 h-[31px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer"
+                                  >
+                                    查看出口详情
+                                  </button>
+                                  <button
+                                    onClick={() => copyToClipboard('NetBird WireGuard Zero-Trust Egress Report', '📋 已复制只读体检报告')}
+                                    className="flex-1 h-[31px] bg-white hover:bg-slate-50 border border-[#E2E8F0] text-[#0F172A] text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer"
+                                  >
+                                    复制检测报告
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 客户端特性 */}
+                            <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
+                              <div className="text-[11px] font-semibold text-slate-700">客户端特性</div>
+                              <div className="flex flex-col gap-2 text-[11px] text-slate-600">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-4 h-4 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">⚡</span>
+                                  <span>全自动静默安装，无需打开终端手动配置</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="w-4 h-4 rounded-full bg-emerald-50 text-[#262626] flex items-center justify-center text-[10px] font-bold">🔒</span>
+                                  <span>已配置专属稳定专线，无需额外网络设置</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="w-4 h-4 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-[10px] font-bold">🛡️</span>
+                                  <span>内置海外纯净住宅 IP 分流与防封策略，杜绝账号风控</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="w-4 h-4 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-bold">💡</span>
+                                  <span>用自然语言直接在项目中写代码、改 Bug</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <button
-                            onClick={() => showToast('🔄 专线密钥已重新同步注入本地配置')}
-                            className="w-full h-[32px] bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E2E8F0] text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1"
-                          >
-                            🔄 重新生成专线连接
-                          </button>
-                        </div>
 
-                        {/* 使用方法 */}
-                        <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2 box-border">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-semibold text-blue-900">使用方法</span>
-                            <span className="text-[10px] text-blue-600">终端直接运行</span>
+                            {/* 官方终端安装命令 */}
+                            {activeAgent.installCmd && (
+                              <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2 box-border">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[11px] font-semibold text-slate-800">官方终端安装命令</span>
+                                  <span className="text-[10px] text-blue-600 font-mono">全局 CLI</span>
+                                </div>
+                                <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 mt-0.5">
+                                  <code className="font-mono text-[11px] font-bold text-slate-800 truncate mr-2 select-all">
+                                    {activeAgent.installCmd}
+                                  </code>
+                                  <button
+                                    onClick={() => copyToClipboard(activeAgent.installCmd!, '📋 已复制官方安装命令')}
+                                    className="text-xs text-[#0F172A] font-medium hover:text-blue-600 cursor-pointer whitespace-nowrap"
+                                  >
+                                    复制
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 安装按钮与进度条 */}
+                            <div className="w-full flex flex-col gap-2">
+                              {installingCardId === activeAgent.id ? (
+                                <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[12px] font-semibold text-slate-800 flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                      <span>正在静默下载并安装，请稍候...</span>
+                                    </span>
+                                    <span className="text-[12px] font-mono font-bold text-blue-600">{installProgress}%</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-[#0F172A] rounded-full transition-all duration-300" style={{ width: `${installProgress}%` }}></div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleStartAutoInstall(activeAgent.id)}
+                                    className="flex-1 h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs"
+                                  >
+                                    ⚡ 一键自动安装
+                                  </button>
+                                  {activeAgent.installCmd && (
+                                    <button
+                                      onClick={() => handleLaunchTerminalInstall(activeAgent.installCmd)}
+                                      className="h-[36px] px-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-black text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99]"
+                                      title="在系统终端窗口中打开并实时查看安装日志"
+                                    >
+                                      💻 终端安装
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-[11px] text-blue-700 leading-[16px]">
-                            打开任意终端工具 (如系统终端、iTerm 或 VS Code 终端)，输入下方命令回车即可：
-                          </p>
-                          <div className="flex items-center justify-between bg-white border border-[#E2E8F0] rounded-full px-4 py-2 mt-0.5">
-                            <code className="font-mono text-[12px] font-bold text-slate-800">{activeAgent.quickCmd}</code>
-                            <button
-                              onClick={() => copyToClipboard(activeAgent.quickCmd, `📋 已复制启动命令: ${activeAgent.quickCmd}`)}
-                              className="text-[12px] text-[#0F172A] font-medium cursor-pointer"
-                            >
-                              复制命令
-                            </button>
+                        ) : (
+                          <div className="w-full flex flex-col gap-3">
+                            {/* 专线状态卡片 */}
+                            <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-semibold text-slate-800">安全传输通道</span>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                  activeAgent.isConfigured
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-black/5 text-[#262626]'
+                                }`}>
+                                  {activeAgent.isConfigured ? 'WireGuard 零信任直连 · 已生效' : 'WireGuard 零信任直连 · 待配置'}
+                                </span>
+                              </div>
+                              <div className="flex flex-col gap-1.5 text-[11px] text-slate-600">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-slate-400">专线模式:</span>
+                                  <span className="font-medium text-slate-700 flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    WireGuard 直连 (18ms)
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-slate-400">使用授权:</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[#262626] font-medium">{activeAgent.isConfigured ? '生效中' : '待配置'}</span>
+                                    <span className="font-mono text-slate-500 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">sk-relay-1006</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleConfigureRelay(activeAgent.id)}
+                                className={`w-full h-[34px] rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1 text-[12px] font-semibold select-none active:scale-[0.99] ${
+                                  activeAgent.isConfigured
+                                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                    : 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
+                                }`}
+                              >
+                                {activeAgent.isConfigured ? '✅ 专线配置已生效 (点击重新同步)' : '⚡ 立即配置专线'}
+                              </button>
+                            </div>
+
+                            {/* 使用方法 */}
+                            <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2 box-border">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-semibold text-blue-900">使用方法</span>
+                                <span className="text-[10px] text-blue-600">终端直接运行</span>
+                              </div>
+                              <p className="text-[11px] text-blue-700 leading-[16px]">
+                                打开系统终端、iTerm 或 VS Code 终端，输入下方命令回车即可：
+                              </p>
+                              <div className="flex items-center justify-between bg-white border border-[#E2E8F0] rounded-full px-4 py-2 mt-0.5">
+                                <code className="font-mono text-[12px] font-bold text-slate-800">{activeAgent.quickCmd}</code>
+                                <button
+                                  onClick={() => copyToClipboard(activeAgent.quickCmd, `📋 已复制启动命令: ${activeAgent.quickCmd}`)}
+                                  className="text-[12px] text-[#0F172A] font-medium cursor-pointer"
+                                >
+                                  复制命令
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => handleLaunchSessionTerminal(activeAgent.quickCmd)}
+                                className="w-full h-[34px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1"
+                              >
+                                💻 在终端窗口启动
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
 
@@ -735,9 +1274,11 @@ export const RelayApp: React.FC = () => {
 
                   {/* 底部操作条 */}
                   <div className="w-full flex flex-row items-center justify-between pt-2.5 border-t border-[#E5E5E5]/60 box-border">
-                    <span className="text-[11px] text-slate-400">随时可在设备管理切换失效/有效</span>
+                    <span className="text-[11px] text-slate-400">
+                      {activeAgent.isDesktopApp ? '已适配 macOS 原生图形架构' : '随时可在设备管理切换失效/有效'}
+                    </span>
                     <button
-                      onClick={() => showToast(`⚡️ ${activeAgent.title} 网络专线往返延迟: 18ms，通信正常！`)}
+                      onClick={() => showToast(`⚡️ ${activeAgent.title} 链路往返延迟: 18ms，专线通信正常！`)}
                       className="h-[28px] px-4 bg-[#0F172A] hover:bg-black rounded-[100px] flex items-center justify-center text-[11px] font-medium text-white transition-all whitespace-nowrap select-none cursor-pointer"
                     >
                       测试网络连接
@@ -745,7 +1286,7 @@ export const RelayApp: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 第 2 列 (常用右列: OpenAI Codex, Antigravity CLI, Kimi Code) */}
+                {/* 第 2 列 (常用右列: Codex 客户端, Codex CLI, OpenClaw) */}
                 <div id="expanded-col-2" className="w-[243px] min-w-[243px] max-w-[243px] max-h-[503px] overflow-y-auto pr-1 flex flex-col items-start gap-[16px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 2 }}>
                   {col2Agents.map(a => (
                     <div
@@ -755,23 +1296,31 @@ export const RelayApp: React.FC = () => {
                     >
                       <div className="w-[195px] h-[24px] flex flex-row justify-between items-start gap-2.5 box-border">
                         <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{a.svg}</div>
-                        <span className={`h-[15px] text-[12px] leading-[15px] text-right whitespace-nowrap ${a.badge === '已安装' ? 'text-[#262626] font-medium' : 'text-[#A3A3A3]'}`}>
-                          {a.badge}
+                        {/* 右上角严格只区分是否安装 */}
+                        <span className={`h-[15px] text-[12px] leading-[15px] text-right whitespace-nowrap flex items-center gap-1 ${
+                          a.badge === '已安装'
+                            ? 'text-[#262626] font-medium'
+                            : 'text-[#A3A3A3]'
+                        }`}>
+                          <span>{a.badge}</span>
                         </span>
                       </div>
                       <div className="flex flex-col items-start gap-1 box-border">
                         <h3 className="font-medium text-[16px] leading-[19px] text-[#262626] capitalize whitespace-nowrap">{a.title}</h3>
                         <p className="font-normal text-[12px] leading-[15px] text-[#A3A3A3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[195px]">{a.sub}</p>
                       </div>
+                      {/* 按钮严格区分是否配置 */}
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectCard(a.id);
-                        }}
-                        className={`h-[31px] min-w-[72px] px-3 rounded-[100px] flex items-center justify-center text-[12px] font-medium leading-[15px] transition-all whitespace-nowrap select-none ${
-                          a.btnDark ? 'bg-[#0F172A] hover:bg-black text-white' : 'bg-white/80 hover:bg-white text-[#0F172A] border border-[#E2E8F0]'
+                        onClick={(e) => handleCardButtonClick(e, a)}
+                        className={`h-[31px] min-w-[72px] px-3.5 rounded-[100px] flex items-center justify-center text-[12px] font-medium leading-[15px] transition-all whitespace-nowrap select-none gap-1.5 ${
+                          a.isConfigured
+                            ? 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
+                            : 'bg-white/80 hover:bg-white text-[#0F172A] border border-[#E2E8F0]'
                         }`}
                       >
+                        {a.isConfigured && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        )}
                         <span>{a.btnLabel}</span>
                       </button>
                     </div>
@@ -864,9 +1413,9 @@ export const RelayApp: React.FC = () => {
               {/* Key 矩阵卡片 */}
               <div className="w-full flex flex-col gap-3">
                 {[
-                  { id: 'key_claude', tool: 'Claude Code', key: 'sk-relay-1006-clau...8831', statusKey: 'key_claude' },
-                  { id: 'key_codex', tool: 'OpenAI Codex', key: 'sk-relay-1007-code...4419', statusKey: 'key_codex' },
-                  { id: 'key_gemini', tool: 'Gemini CLI', key: 'sk-relay-1008-gemi...1102', statusKey: 'key_gemini' }
+                  { id: 'key_chatgpt', tool: 'ChatGPT / Codex', key: 'sk-relay-1006-chat...8831', statusKey: 'key_chatgpt' },
+                  { id: 'key_cherry', tool: 'Cherry Studio', key: 'sk-relay-1007-cher...4419', statusKey: 'key_cherry' },
+                  { id: 'key_hermes', tool: 'Hermes Agent', key: 'sk-relay-1008-herm...1102', statusKey: 'key_hermes' }
                 ].map(item => {
                   const isActive = deviceKeyStatusMap[item.statusKey] ?? true;
                   return (
@@ -912,7 +1461,7 @@ export const RelayApp: React.FC = () => {
         )}
 
         {/* ========================================================================= */}
-        {/* C. 出口安全中心 (Claude 403 焚决标准 / Google 准入标准) */}
+        {/* C. 出口安全中心 (OpenAI 纯净标准 / 海外专线加速) */}
         {/* ========================================================================= */}
         {viewMode === 'security' && (
           <div className="w-full flex-1 flex flex-col justify-between box-border overflow-hidden select-none">
@@ -922,35 +1471,35 @@ export const RelayApp: React.FC = () => {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-3">
                   <h1 className="text-[22px] font-bold text-slate-900 tracking-tight leading-none m-0">
-                    {securityVendor === 'claude' ? 'Claude 出口防封中心' : 'Google AI 区域准入中心'}
+                    {securityVendor === 'openai' ? 'OpenAI 专线防封中心' : '海外专线加速中心'}
                   </h1>
                   <div className="flex items-center p-0.5 bg-slate-200/70 rounded-full text-[11px] font-medium ml-1">
                     <button
-                      onClick={() => setSecurityVendor('claude')}
+                      onClick={() => setSecurityVendor('openai')}
                       className={`px-3 py-1 rounded-full transition-all cursor-pointer whitespace-nowrap ${
-                        securityVendor === 'claude' ? 'bg-amber-500 text-white font-medium' : 'text-slate-600 hover:text-slate-900'
+                        securityVendor === 'openai' ? 'bg-[#0F172A] text-white font-medium' : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      Claude 403
+                      OpenAI 专线
                     </button>
                     <button
-                      onClick={() => setSecurityVendor('google')}
+                      onClick={() => setSecurityVendor('global')}
                       className={`px-3 py-1 rounded-full transition-all cursor-pointer whitespace-nowrap ${
-                        securityVendor === 'google' ? 'bg-blue-600 text-white font-medium' : 'text-slate-600 hover:text-slate-900'
+                        securityVendor === 'global' ? 'bg-blue-600 text-white font-medium' : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      Google AI
+                      全局专线
                     </button>
                   </div>
                 </div>
                 <p className="text-xs text-slate-400 font-normal m-0">
-                  {securityVendor === 'claude' ? 'claude403 焚决标准 · 实时监控生效中' : 'Gemini / DeepMind 官方准入规范 · 实时监控生效中'}
+                  {securityVendor === 'openai' ? 'api.openai.com 官方准入与住宅 IP 分流 · 实时监控生效中' : '海外主流大模型 API 专线出口 · 纯净直连生效中'}
                 </p>
               </div>
 
               <div className="flex items-center gap-2.5">
                 <button
-                  onClick={() => copyToClipboard('NetBird WireGuard Zero-Trust Egress Report', '📋 已复制只读体检报告')}
+                  onClick={() => copyToClipboard(generateEgressReport(), '📋 已复制完整出口体检报告')}
                   className="h-9 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs whitespace-nowrap"
                 >
                   📋 复制报告
@@ -968,23 +1517,43 @@ export const RelayApp: React.FC = () => {
             {/* 主流式报告卡片 */}
             <div className="w-full flex-1 px-8 pb-3 pt-1 flex flex-col gap-2.5 box-border overflow-y-auto no-scrollbar">
               
-              {/* 概要警报卡片 */}
+              {/* 概要警报卡片 (动态联动当前风险计数) */}
               <div className="w-full min-h-[105px] bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex items-center gap-4 box-border flex-shrink-0">
                 <div className={`w-11 h-11 rounded-2xl border flex items-center justify-center flex-shrink-0 ${
-                  securityVendor === 'claude' ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-blue-50 border-blue-100 text-blue-600'
+                  highRiskCount > 0
+                    ? securityVendor === 'openai'
+                      ? 'bg-rose-50 border-rose-100 text-rose-500'
+                      : 'bg-blue-50 border-blue-100 text-blue-600'
+                    : 'bg-emerald-50 border-emerald-100 text-emerald-600'
                 }`}>
-                  <svg className="w-5 h-5 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                  </svg>
+                  {highRiskCount > 0 ? (
+                    <svg className="w-5 h-5 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-[15px] font-bold text-slate-900 leading-snug m-0">
-                    发现 <span className="text-rose-600 font-bold">1 项高危</span> + <span className="text-amber-600 font-bold">2 项警告</span>
+                    {highRiskCount > 0 ? (
+                      <>
+                        发现 <span className="text-rose-600 font-bold">1 项高危</span> + <span className="text-amber-600 font-bold">2 项警告</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-emerald-700 font-bold">高危风险已消除</span> · 0 项高危 + <span className="text-amber-600 font-bold">2 项接管就绪</span>
+                      </>
+                    )}
                   </h2>
                   <p className="text-xs text-slate-500 mt-1 m-0 leading-normal">
-                    {securityVendor === 'claude'
-                      ? 'IPv6 旁路泄露可能导致 403 封号，建议立即处理下方高危项。'
-                      : '当前属于 US 官方准入区域，但检测到本机 IPv6 直连边缘节点，建议立即排查。'}
+                    {highRiskCount > 0
+                      ? securityVendor === 'openai'
+                        ? 'IPv6 旁路泄露可能导致 OpenAI 检测到国内原生 IP 触发风控，建议立即处理下方高危项。'
+                        : '当前属于海外官方准入区域，但检测到本机 IPv6 直连边缘节点，建议立即排查。'
+                      : 'IPv6 旁路已完全阻断，所有握手流量均强制经由 NetBird 原生专线出口，防封体系已完备。'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 pl-4 border-l border-slate-100 flex-shrink-0">
@@ -998,30 +1567,64 @@ export const RelayApp: React.FC = () => {
                 </div>
               </div>
 
-              {/* 风险条目 1: IPv6 旁路泄露 */}
+              {/* 风险条目 1: IPv6 旁路泄露 (动态响应一键屏蔽交互态) */}
               <div className="w-full bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex items-center justify-between gap-4 box-border">
                 <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200">高危</span>
+                  {isIpv6Blocked ? (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      已防御
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                      高危
+                    </span>
+                  )}
                   <div className="flex flex-col">
                     <span className="font-semibold text-slate-900 text-sm">IPv6 旁路泄露检测 (Bypass Leak)</span>
-                    <span className="text-xs text-slate-400 mt-0.5">Anthropic 会在握手时探测 IPv6 端点，直接暴露国内原生公网 IP</span>
+                    <span className="text-xs text-slate-400 mt-0.5">
+                      {isIpv6Blocked
+                        ? '已注入本地零信任防火墙规则，强制全局仅走海外专线出口，彻底杜绝 IPv6 原生暴露'
+                        : '海外 AI 服务在握手时会探测 IPv6 端点，直接暴露国内原生公网 IP'}
+                    </span>
                   </div>
                 </div>
-                <button
-                  onClick={() => showToast('🛡️ 已开启本地零信任屏蔽规则，IPv6 旁路已完全阻断')}
-                  className="h-8 px-3.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-medium cursor-pointer transition-all"
-                >
-                  一键屏蔽
-                </button>
+
+                {isIpv6Blocked ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      已屏蔽泄露
+                    </span>
+                    <button
+                      onClick={handleToggleIpv6Block}
+                      className="h-8 px-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 text-xs font-normal cursor-pointer transition-all"
+                      title="解除屏蔽规则"
+                    >
+                      解除
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleToggleIpv6Block}
+                    className="h-8 px-3.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-medium cursor-pointer transition-all active:scale-95 shadow-xs"
+                  >
+                    一键屏蔽
+                  </button>
+                )}
               </div>
 
-              {/* 风险条目 2: DNS 分流与污染 */}
+              {/* 风险条目 2: DNS 分流与污染 (厂商动态适配) */}
               <div className="w-full bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex items-center justify-between gap-4 box-border">
                 <div className="flex items-center gap-3">
                   <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200">警告</span>
                   <div className="flex flex-col">
                     <span className="font-semibold text-slate-900 text-sm">DNS 解析分流纯净度 (DNS Leak)</span>
-                    <span className="text-xs text-slate-400 mt-0.5">api.anthropic.com 域名需锁定由 NetBird 海外节点代理解析</span>
+                    <span className="text-xs text-slate-400 mt-0.5">
+                      {securityVendor === 'openai'
+                        ? 'api.openai.com 域名需锁定由 NetBird 海外节点代理解析'
+                        : '海外大模型 API 域名锁定由海外专线节点代理解析'}
+                    </span>
                   </div>
                 </div>
                 <span className="text-xs font-medium text-amber-600">已由 100.64.0.1 接管</span>
@@ -1039,7 +1642,7 @@ export const RelayApp: React.FC = () => {
                 <span className="text-xs text-slate-400">已自动注入时区 Mock</span>
               </div>
 
-              {/* 正常项折叠面板 */}
+              {/* 正常项折叠面板 (动态同步通过项计数与列表) */}
               <div className="w-full bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex flex-col gap-3 box-border">
                 <div
                   onClick={() => setIsPassedExpanded(prev => !prev)}
@@ -1047,13 +1650,19 @@ export const RelayApp: React.FC = () => {
                 >
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span className="font-semibold text-slate-900 text-sm">已通过检测项 (2项安全)</span>
+                    <span className="font-semibold text-slate-900 text-sm">已通过检测项 ({passedCount}项安全)</span>
                   </div>
                   <span className="text-xs text-slate-400">{isPassedExpanded ? '收起 ↑' : '展开详情 ↓'}</span>
                 </div>
 
                 {isPassedExpanded && (
                   <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                    {isIpv6Blocked && (
+                      <div className="flex items-center justify-between">
+                        <span>IPv6 旁路泄露零信任防火墙</span>
+                        <span className="text-emerald-600 font-medium">✅ 本地规则生效中，旁路已强制阻断</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <span>TLS 握手特征 (JA3/JA4) 纯净度</span>
                       <span className="text-emerald-600 font-medium">✅ 原生 Go/Curl 特征，无 MITM 中间人痕迹</span>

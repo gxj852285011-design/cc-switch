@@ -8,6 +8,112 @@ import ClaudeSvg from "@/icons/extracted/claude.svg?url";
 import OpenAISvg from "@/icons/extracted/openai.svg?url";
 import GeminiSvg from "@/icons/extracted/gemini.svg?url";
 import OpenClawSvg from "@/icons/extracted/claw.svg?url";
+import HermesPng from "@/icons/extracted/hermes.png";
+import KimiSvg from "@/icons/extracted/kimi.svg?url";
+
+export function KimiIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <img
+      src={KimiSvg}
+      width={size}
+      height={size}
+      className={className}
+      alt="Kimi"
+      loading="lazy"
+    />
+  );
+}
+
+export function CherryStudioIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <path
+        d="M16.5 4C14.8 4 12.8 5.2 12 7C11.2 5.2 9.2 4 7.5 4"
+        stroke="#16A34A"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 7V10"
+        stroke="#16A34A"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="8" cy="15" r="4.5" fill="#EF4444" />
+      <circle cx="16" cy="15" r="4.5" fill="#DC2626" />
+      <path
+        d="M6.5 13.5C7 13 8 13 8.5 13.5"
+        stroke="#FCA5A5"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14.5 13.5C15 13 16 13 16.5 13.5"
+        stroke="#FCA5A5"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function ChatboxIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <rect width="24" height="24" rx="6" fill="#2563EB" />
+      <path
+        d="M7 6.5C5.62 6.5 4.5 7.62 4.5 9V14C4.5 15.38 5.62 16.5 7 16.5H8.5V18.8C8.5 19.2 9 19.45 9.3 19.2L12.5 16.5H17C18.38 16.5 19.5 15.38 19.5 14V9C19.5 7.62 18.38 6.5 17 6.5H7Z"
+        fill="white"
+        fillOpacity="0.25"
+      />
+      <path
+        d="M12 7.5L8.5 13H12L11.5 16.5L15.5 11H12L12 7.5Z"
+        fill="white"
+      />
+    </svg>
+  );
+}
+
+export function CursorIcon({ size = 24, className = "" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <rect width="24" height="24" rx="6" fill="#0F172A" />
+      <path
+        d="M12 5L18 8.5V15.5L12 19L6 15.5V8.5L12 5Z"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 5V12M12 12L18 8.5M12 12L6 8.5M12 12V19"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function ClaudeIcon({ size = 16, className = "" }: IconProps) {
   return (
@@ -56,6 +162,19 @@ export function OpenClawIcon({ size = 16, className = "" }: IconProps) {
       height={size}
       className={className}
       alt="OpenClaw"
+      loading="lazy"
+    />
+  );
+}
+
+export function HermesIcon({ size = 16, className = "" }: IconProps) {
+  return (
+    <img
+      src={HermesPng}
+      width={size}
+      height={size}
+      className={`rounded-full object-cover ${className}`}
+      alt="Hermes"
       loading="lazy"
     />
   );

@@ -1484,6 +1484,11 @@ pub fn run() {
                     let _ = window.set_decorations(false);
                     let _ = window.set_shadow(true);
                 }
+                // macOS：Titlebar Overlay 沉浸式透明顶栏，清空原生 window title 避免与网页顶栏文本重叠
+                #[cfg(target_os = "macos")]
+                {
+                    let _ = window.set_title("");
+                }
                 if settings.silent_startup {
                     // 静默启动模式：保持窗口隐藏
                     let _ = window.hide();
@@ -1538,6 +1543,9 @@ pub fn run() {
             commands::open_config_folder,
             commands::pick_directory,
             commands::open_external,
+            commands::open_desktop_app,
+            commands::check_desktop_app_installed,
+            commands::install_kimi_desktop,
             commands::get_init_error,
             commands::get_migration_result,
             commands::get_skills_migration_result,

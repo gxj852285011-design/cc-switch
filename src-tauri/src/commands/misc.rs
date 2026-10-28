@@ -57,6 +57,184 @@ pub async fn open_external(app: AppHandle, url: String) -> Result<bool, String> 
     Ok(true)
 }
 
+/// 打开 macOS 或 Windows 桌面端应用程序（支持传应用名称如 "Kimi Code", "Claude", "Codex", "ChatGPT" 或全路径）
+#[tauri::command]
+pub async fn open_desktop_app(_app: AppHandle, app_name_or_path: String) -> Result<bool, String> {
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+        let target = if app_name_or_path.starts_with('/') {
+            app_name_or_path
+        } else {
+            let clean_name = app_name_or_path.trim_end_matches(".app");
+            let home = std::env::var("HOME").unwrap_or_default();
+            let mut check_names = vec![clean_name.to_string()];
+            if clean_name.eq_ignore_ascii_case("codex") || clean_name.eq_ignore_ascii_case("chatgpt") {
+                check_names.push("ChatGPT".to_string());
+                check_names.push("Codex".to_string());
+                check_names.push("Codex++".to_string());
+            } else if clean_name.eq_ignore_ascii_case("kimi") || clean_name.eq_ignore_ascii_case("kimi code") || clean_name.eq_ignore_ascii_case("kimicode") {
+                check_names.push("Kimi".to_string());
+                check_names.push("Kimi Code".to_string());
+                check_names.push("KimiCode".to_string());
+            } else if clean_name.eq_ignore_ascii_case("cherry") || clean_name.eq_ignore_ascii_case("cherry studio") || clean_name.eq_ignore_ascii_case("cherrystudio") {
+                check_names.push("Cherry Studio".to_string());
+                check_names.push("CherryStudio".to_string());
+                check_names.push("Cherry".to_string());
+            } else if clean_name.eq_ignore_ascii_case("chatbox") || clean_name.eq_ignore_ascii_case("chatbox ai") {
+                check_names.push("Chatbox".to_string());
+                check_names.push("Chatbox AI".to_string());
+            } else if clean_name.eq_ignore_ascii_case("cursor") {
+                check_names.push("Cursor".to_string());
+            }
+            let mut found_path = None;
+            for name in &check_names {
+                let candidates = [
+                    format!("/Applications/{}.app", name),
+                    format!("{}/Applications/{}.app", home, name),
+                    format!("/System/Applications/{}.app", name),
+                ];
+                for path in &candidates {
+                    if std::path::Path::new(path).exists() {
+                        found_path = Some(path.clone());
+                        break;
+                    }
+                }
+                if found_path.is_some() {
+                    break;
+                }
+            }
+            found_path.unwrap_or(app_name_or_path)
+        };
+        let mut cmd = Command::new("open");
+        if target.starts_with('/') {
+            cmd.arg(&target);
+        } else {
+            cmd.arg("-a").arg(&target);
+        }
+        let output = cmd.output().map_err(|e| format!("启动应用程序失败: {e}"))?;
+        if output.status.success() {
+            Ok(true)
+        } else {
+            let stderr = decode_command_output(&output.stderr);
+            Err(format!("启动失败: {stderr}"))
+        }
+    }
+    #[cfg(target_os = "windows")]
+    {
+        app.opener().open_path(&app_name_or_path, None::<String>).map_err(|e| e.to_string())?;
+        Ok(true)
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        let _ = app;
+        let _ = app_name_or_path;
+        Err("当前系统不支持启动桌面应用".to_string())
+    }
+}
+
+/// 检查指定的桌面应用是否已安装（支持传应用名称或绝对路径）
+#[tauri::command]
+pub async fn check_desktop_app_installed(app_name_or_path: String) -> Result<bool, String> {
+    #[cfg(target_os = "macos")]
+    {
+        if app_name_or_path.starts_with('/') {
+            return Ok(std::path::Path::new(&app_name_or_path).exists());
+        }
+        let clean_name = app_name_or_path.trim_end_matches(".app");
+        let home = std::env::var("HOME").unwrap_or_default();
+        let mut check_names = vec![clean_name.to_string()];
+        if clean_name.eq_ignore_ascii_case("codex") || clean_name.eq_ignore_ascii_case("chatgpt") {
+            check_names.push("ChatGPT".to_string());
+            check_names.push("Codex".to_string());
+            check_names.push("Codex++".to_string());
+        } else if clean_name.eq_ignore_ascii_case("kimi") || clean_name.eq_ignore_ascii_case("kimi code") || clean_name.eq_ignore_ascii_case("kimicode") {
+            check_names.push("Kimi".to_string());
+            check_names.push("Kimi Code".to_string());
+            check_names.push("KimiCode".to_string());
+        } else if clean_name.eq_ignore_ascii_case("cherry") || clean_name.eq_ignore_ascii_case("cherry studio") || clean_name.eq_ignore_ascii_case("cherrystudio") {
+            check_names.push("Cherry Studio".to_string());
+            check_names.push("CherryStudio".to_string());
+            check_names.push("Cherry".to_string());
+        } else if clean_name.eq_ignore_ascii_case("chatbox") || clean_name.eq_ignore_ascii_case("chatbox ai") {
+            check_names.push("Chatbox".to_string());
+            check_names.push("Chatbox AI".to_string());
+        } else if clean_name.eq_ignore_ascii_case("cursor") {
+            check_names.push("Cursor".to_string());
+        }
+        for name in &check_names {
+            let candidates = [
+                format!("/Applications/{}.app", name),
+                format!("{}/Applications/{}.app", home, name),
+                format!("/System/Applications/{}.app", name),
+            ];
+            for path in &candidates {
+                if std::path::Path::new(path).exists() {
+                    return Ok(true);
+                }
+            }
+        }
+        Ok(false)
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app_name_or_path;
+        Ok(false)
+    }
+}
+
+/// 自动下载并静默安装 Kimi Code 桌面客户端 (macOS DMG 自动挂载安装)
+#[tauri::command]
+pub async fn install_kimi_desktop() -> Result<bool, String> {
+    #[cfg(target_os = "macos")]
+    {
+        tokio::task::spawn_blocking(|| {
+            use std::process::Command;
+            let url = if std::env::consts::ARCH == "aarch64" {
+                "https://code.kimi.com/kimi-code/desktop/download/KimiCode-mac-arm64.dmg"
+            } else {
+                "https://code.kimi.com/kimi-code/desktop/download/KimiCode-mac-x64.dmg"
+            };
+            let script = format!(
+                r#"
+                set -e
+                tmp_dmg="/tmp/KimiCode_autoinstall.dmg"
+                curl -L -o "$tmp_dmg" "{url}"
+                mount_dir=$(hdiutil attach "$tmp_dmg" -nobrowse -readonly | grep -E "/Volumes/" | awk -F'\t' '{{print $NF}}' | head -n 1)
+                if [ -n "$mount_dir" ] && [ -d "$mount_dir/Kimi Code.app" ]; then
+                    rm -rf "/Applications/Kimi Code.app"
+                    cp -R "$mount_dir/Kimi Code.app" /Applications/
+                    hdiutil detach "$mount_dir" -force || true
+                    rm -f "$tmp_dmg"
+                    exit 0
+                else
+                    [ -n "$mount_dir" ] && hdiutil detach "$mount_dir" -force || true
+                    rm -f "$tmp_dmg"
+                    exit 1
+                fi
+                "#
+            );
+            let output = Command::new("bash")
+                .arg("-c")
+                .arg(&script)
+                .output()
+                .map_err(|e| format!("执行安装脚本失败: {e}"))?;
+            if output.status.success() {
+                Ok(true)
+            } else {
+                let stderr = decode_command_output(&output.stderr);
+                Err(format!("安装 Kimi Code 桌面端失败: {stderr}"))
+            }
+        })
+        .await
+        .map_err(|e| format!("安装任务执行异常: {e}"))?
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        Err("当前系统请使用浏览器前往官网下载安装".to_string())
+    }
+}
+
 #[tauri::command]
 pub async fn copy_text_to_clipboard(text: String) -> Result<bool, String> {
     // Use spawn_blocking to avoid blocking the async runtime
