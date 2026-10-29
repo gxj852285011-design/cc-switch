@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { checkForUpdate, getCurrentVersion, type UpdateInfo } from '@/lib/updater';
+import { checkForUpdate, getCurrentVersion, APP_CURRENT_VERSION, type UpdateInfo } from '@/lib/updater';
 
 interface HotUpdateModalProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ export const HotUpdateModal: React.FC<HotUpdateModalProps> = ({
   onSuccessToast,
   initialUpdateInfo
 }) => {
-  const [currentVersion, setCurrentVersion] = useState<string>('4.2.0');
+  const [currentVersion, setCurrentVersion] = useState<string>(APP_CURRENT_VERSION);
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(initialUpdateInfo || null);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);

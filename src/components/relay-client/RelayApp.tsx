@@ -340,8 +340,13 @@ export const RelayApp: React.FC = () => {
         if (res.status === 'available') {
           setPendingUpdateInfo(res.info);
           setHasPendingUpdate(true);
+        } else {
+          setHasPendingUpdate(false);
+          setPendingUpdateInfo(null);
         }
-      }).catch(() => {});
+      }).catch(() => {
+        setHasPendingUpdate(false);
+      });
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -853,25 +858,20 @@ export const RelayApp: React.FC = () => {
 
         </div>
 
-        {/* 原生热更新入口 */}
+        {/* 单点版本展示与检查更新入口（避免与顶栏出现重复热更新提示） */}
         <div className="w-[104px] px-3 pb-2 flex flex-col items-center">
           <button
             onClick={() => setIsUpdateModalOpen(true)}
-            className="w-[84px] h-[32px] rounded-xl flex items-center justify-center gap-1.5 text-[11px] font-medium transition-all cursor-pointer border border-slate-200/60 bg-white/70 hover:bg-white text-slate-700 shadow-2xs active:scale-95 group relative"
-            title="点击检查原生应用热更新"
+            className="w-full h-[26px] rounded-lg flex items-center justify-center gap-1.5 text-[11px] font-mono text-slate-700 hover:text-slate-900 hover:bg-black/5 transition-all cursor-pointer select-none"
+            title="点击检查版本更新"
           >
             {hasPendingUpdate ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                <span className="text-orange-600 font-semibold">发现新版</span>
-              </>
+              <span className="flex items-center gap-1.5 text-orange-600 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                <span>新版 v{pendingUpdateInfo?.availableVersion}</span>
+              </span>
             ) : (
-              <>
-                <svg className="w-3.5 h-3.5 text-slate-700 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>热更新</span>
-              </>
+              <span className="text-slate-700 hover:text-slate-900 transition-colors">v4.2.1</span>
             )}
           </button>
         </div>
@@ -932,19 +932,17 @@ export const RelayApp: React.FC = () => {
               <span>NetBird WireGuard (100.64.0.12 · 官方直连零解密)</span>
             </span>
 
-            {/* 热更新状态胶囊 */}
-            <button
-              onClick={() => setIsUpdateModalOpen(true)}
-              className={`text-[11px] font-medium rounded-full px-3 py-1 flex items-center gap-1.5 select-none transition-all cursor-pointer border shadow-2xs active:scale-95 ${
-                hasPendingUpdate
-                  ? 'text-orange-800 bg-orange-50/90 border-orange-300 animate-pulse'
-                  : 'text-slate-700 bg-white/80 border-slate-200/80 hover:bg-white'
-              }`}
-              title="检查或应用原生应用热更新"
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${hasPendingUpdate ? 'bg-orange-500' : 'bg-emerald-500'}`}></span>
-              <span>{hasPendingUpdate ? `🔥 发现新版 v${pendingUpdateInfo?.availableVersion}` : '热更新就绪'}</span>
-            </button>
+            {/* 仅在探测到真正有新版本时显示，避免误报“热更新就绪”导致用户困惑 */}
+            {hasPendingUpdate && (
+              <button
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="text-[11px] font-medium rounded-full px-3 py-1 flex items-center gap-1.5 select-none transition-all cursor-pointer border shadow-2xs active:scale-95 text-orange-800 bg-orange-50/90 border-orange-300 animate-pulse hover:bg-orange-100"
+                title="发现新版本，点击查看并应用热更新"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                <span>🔥 发现新版 v{pendingUpdateInfo?.availableVersion}</span>
+              </button>
+            )}
 
             {/* 帮助中心按钮 */}
             <button

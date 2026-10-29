@@ -17,6 +17,8 @@ Detailed Chinese iteration records and QA checklists are maintained in [docs/ITE
 - **Top-Level Crash & White Screen Defense**: Added defensive versioning and JSON parsing fallbacks for all local storage keys, paired with `FrontendErrorBoundary` diagnostics to eliminate blank white screens.
 
 ### Fixed & Sanitized
+- **Eliminated Deceptive Update Prompts & UI Duplication**: Removed the static "热更新就绪" capsule and redundant sidebar action button that misled users when no update existed. Replaced with single, unobtrusive `v4.2.1` sidebar entry point and dynamic header badge shown only when an actual newer release is detected.
+- **Robust CDN Manifest-Based Semver Comparison**: Upgraded `updater.ts` with `compareSemver` against CORS-friendly GitHub Pages static manifests (`version.json`), eliminating GitHub API 403 rate limits and false positives.
 - **Complete Developer Identity & Secret Sanitization**: Scrubbed all personal names (高相健 / GX), private session tokens, and internal subnet IPs across code, UI, diffs, and mock stores. Rebranded account panel to neutral enterprise `未登录用户` (AI / 8x line indicator).
 - **Codex Key Visibility**: Resolved the state disconnect where Codex showed configured in Access but lacked a corresponding entry in Device Management.
 
