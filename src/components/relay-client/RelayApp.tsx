@@ -6,7 +6,7 @@ import { NetBirdEngineService } from './NetBirdEngineService';
 import { AuthCenterModal } from './features/auth/AuthCenterModal';
 import { ClaudeIcon, CodexIcon, HermesIcon, OpenClawIcon } from '../BrandIcons';
 import { HotUpdateModal } from './features/updater/HotUpdateModal';
-import { checkForUpdate, type UpdateInfo } from '@/lib/updater';
+import { checkForUpdate, APP_CURRENT_VERSION, type UpdateInfo } from '@/lib/updater';
 
 export type ViewMode = 'home' | 'devices' | 'security';
 export type SecurityVendor = 'openai' | 'global';
@@ -871,7 +871,7 @@ export const RelayApp: React.FC = () => {
                 <span>新版 v{pendingUpdateInfo?.availableVersion}</span>
               </span>
             ) : (
-              <span className="text-slate-700 hover:text-slate-900 transition-colors">v4.2.1</span>
+              <span className="text-slate-700 hover:text-slate-900 transition-colors">v{APP_CURRENT_VERSION}</span>
             )}
           </button>
         </div>

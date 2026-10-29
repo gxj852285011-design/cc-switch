@@ -28,19 +28,32 @@
 2. **次版本号 (MINOR)**：向下兼容的新功能增量引入（例如新增客户端支持、新增防封专线模块、新增热更新机制）。
 3. **修订号 (PATCH)**：向下兼容的问题修复、体验优化、安全脱敏与文档更新。
 
-### 版本发布闭环红线（四步质检法）
-每发起一次版本迭代，必须严格执行以下闭环，严禁未达标直接发版：
-- [ ] **步骤 1：版本号同步**：统一更新 `package.json` 与 `src-tauri/tauri.conf.json` 中的版本号。
-- [ ] **步骤 2：迭代双向归档**：
-  - 更新项目根目录 `CHANGELOG.md`（遵循 Keep a Changelog 格式，面向开源与 CI）。
-  - 更新 `docs/ITERATION_LOG.md`（面向产品、业务与代码审计）。
+### 版本发布闭环红线（六步全栈质检法）
+每发起一次版本迭代，必须严格执行以下闭环，严禁漏项直接发版：
+- [ ] **步骤 1：全栈版本号一致性锁死（严禁单点遗漏）**：
+  - `package.json`（前端根版本）
+  - `src-tauri/tauri.conf.json`（Tauri 配置）
+  - `src-tauri/Cargo.toml`（Rust 顶层包版本，直接决定 macOS `Info.plist` 与原生 `CFBundleShortVersionString`）
+  - `src-tauri/Cargo.lock`（Rust 锁文件同步）
+  - `src/lib/updater.ts`（应用内热更新当前版本常量 `APP_CURRENT_VERSION`）
+  - `docs/version.json` 与 `docs/latest.json`（更新探测与发版元数据）
+  - `docs/index.html` 与 `docs/download/index.html`（官方门户下载资产链接与版本药丸标签）
+- [ ] **步骤 2：迭代双向归档与多语言摘要**：
+  - 更新项目根目录 `CHANGELOG.md`。
+  - 创建并校验 `src/whats-new/<版本>.json`（包含 zh/en/ja/ko 4语摘要，通过单测门禁）。
+  - 更新 `docs/ITERATION_LOG.md`（版本台账全景）。
 - [ ] **步骤 3：自动化测试与构建门禁**：
   - `pnpm run test:unit` 全部绿灯通过。
   - `pnpm run build:renderer` 零错误零警告构建成功。
   - `pnpm tauri build -b app` 生产级打包无中断。
-- [ ] **步骤 4：Git 规范化提交与打标**：
+- [ ] **步骤 4：真机原生二进制与 DMG 资产打包**：
+  - 检查 macOS 应用程序元数据：`plutil -p "/Applications/AI Agent Hub.app/Contents/Info.plist" | grep CFBundleShortVersionString` 必须与目标版本 100% 吻合。
+  - 生成真实 `AI_Agent_Hub_<版本>_aarch64.dmg` 安装包，严禁在官网使用旧版本 DMG 作为回退替身。
+- [ ] **步骤 5：Git 规范化提交与打标**：
   - Commit 采用 Conventional Commits 格式（`feat:` / `fix:` / `docs:` / `refactor:` / `security:`）。
-  - 生产发布必须打上 Git Tag（如 `git tag -a v4.2.1 -m "Release v4.2.1"`）。
+  - 生产发布必须打上 Git Tag（如 `git tag -a v4.2.2 -m "Release v4.2.2"`）。
+- [ ] **步骤 6：GitHub Release 与官网资产同步发布**：
+  - 确保 GitHub Releases 存在对应 Tag 并已挂载实际可下载的 `.dmg` 资产，杜绝官网指向 404 或旧版本。
 
 ---
 

@@ -31,3 +31,5 @@ CODEBUDDY.md
 mainWindow.js
 
 .mpr/
+docs/*.dmg
+docs/**/*.dmg
