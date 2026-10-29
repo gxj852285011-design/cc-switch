@@ -1474,6 +1474,17 @@ pub fn run() {
             // 静默启动：根据设置决定是否显示主窗口
             let settings = crate::settings::get_settings();
             if let Some(window) = app.get_webview_window("main") {
+                // 强制锁定主窗口最小尺寸为 1047px 宽，600px 高
+                let _ = window.set_min_size(Some(tauri::LogicalSize::new(1047.0, 600.0)));
+                if let Ok(size) = window.inner_size() {
+                    let scale_factor = window.scale_factor().unwrap_or(1.0);
+                    let logical_width = size.width as f64 / scale_factor;
+                    if logical_width < 1047.0 {
+                        let logical_height = (size.height as f64 / scale_factor).max(600.0);
+                        let _ = window.set_size(tauri::LogicalSize::new(1047.0, logical_height));
+                    }
+                }
+
                 // 在窗口首次显示前同步装饰状态，避免前端加载后再切换导致标题栏闪烁
                 // Linux：由设置决定（解决 Wayland 下系统窗口按钮不可用的问题）
                 #[cfg(target_os = "linux")]

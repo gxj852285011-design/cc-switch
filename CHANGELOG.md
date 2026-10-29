@@ -10,9 +10,10 @@ Detailed Chinese iteration records and QA checklists are maintained in [docs/ITE
 ## [4.2.2] - 2026-10-29
 
 ### Added & Improved
+- **1047px Minimum Width Enforcement & Fluid Width Adaptation**: Enforced `1047px` strict minimum window width across native OS window levels (`minWidth: 1047` in `tauri.conf.json` & `tauri.windows.conf.json`, runtime `window.set_min_size(LogicalSize::new(1047.0, 600.0))`) and frontend webview (`min-w-[1047px]`). Converted card columns from fixed pixel locks to fluid responsive flex (`flex-1 min-w-[250px] max-w-[380px]` and `.agent-card w-full`), seamlessly adapting from 1047px minimum width up to wide screens without empty side voids or edge clipping.
 - **Card Height Adaptive Auto-Fill**: Overhauled Agent access card columns (`#expanded-col-1`, `#expanded-col-2`) from rigid heights (`max-h-[503px]`, `h-[157px]`) to adaptive vertical flexbox distribution (`flex-1 min-h-[135px]`, `h-full flex flex-col justify-between`). Cards expand dynamically to divide and fill container height evenly, completely eliminating bottom dead space.
 - **Modern Large Corner Radius & Baseline Alignment**: Upgraded cards to `rounded-[32px]` matching Figma design tokens. Symmetrically aligned stage and hero vertical padding (`pt-[24px] pb-[32px]`), locking Row 3 card buttons and Left Hero buttons ("+ 一键配置所有" / "环境检测") to the exact same horizontal baseline.
-- **Geometric Symmetry & Anti-Jitter Drawer Transitions**: Increased card and column widths to 260px (`px-[28px]` stage padding). Mathematically equalized the total width occupied during both folded and expanded states (Hero 360 + Col1 260 + Col2 260 = 912px; Col1 260 + Drawer 360 + Col2 260 = 912px), completely eliminating horizontal twitching and compression during drawer animations.
+- **Geometric Symmetry & Anti-Jitter Drawer Transitions**: Equalized the total width occupied during both folded and expanded states (Hero 340 + Col1 flex + Col2 flex; Col1 flex + Drawer 340 + Col2 flex), completely eliminating horizontal twitching and compression during drawer animations.
 
 ## [4.2.1] - 2026-10-29
 

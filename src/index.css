@@ -607,10 +607,10 @@ input[type="password"]::-ms-clear {
   transition: width 480ms cubic-bezier(0.4, 0, 0.2, 1), opacity 360ms ease-in, padding 480ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 .hero-expanded {
-  width: 360px !important;
-  max-width: 360px !important;
-  min-width: 360px !important;
-  padding: 24px 24px 32px 32px !important;
+  width: 340px !important;
+  max-width: 340px !important;
+  min-width: 340px !important;
+  padding: 24px 20px 32px 24px !important;
   margin: 0 !important;
   opacity: 1 !important;
   overflow: hidden !important;
@@ -634,9 +634,9 @@ input[type="password"]::-ms-clear {
   transition: width 480ms cubic-bezier(0.4, 0, 0.2, 1), opacity 360ms ease-in, padding 480ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 .drawer-expanded {
-  width: 360px !important;
-  min-width: 360px !important;
-  max-width: 360px !important;
+  width: 340px !important;
+  min-width: 340px !important;
+  max-width: 340px !important;
   padding: 20px !important;
   margin: 0 !important;
   opacity: 1 !important;
@@ -649,12 +649,19 @@ input[type="password"]::-ms-clear {
   transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 保证卡片列与卡片本体绝对不被挤压压缩，对齐设计稿 260px 宽度 */
-#expanded-col-1, #expanded-col-2, .agent-card {
+/* 卡片列与卡片自适应宽度适配：1047px 最小宽度基准，弹性自适应拉伸 */
+#expanded-col-1, #expanded-col-2 {
+  flex: 1 1 0% !important;
+  min-width: 250px !important;
+  max-width: 380px !important;
   flex-shrink: 0 !important;
-  width: 260px !important;
-  min-width: 260px !important;
-  max-width: 260px !important;
+}
+
+.agent-card {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  flex-shrink: 0 !important;
 }
 
 /* 隐藏滚动条 */

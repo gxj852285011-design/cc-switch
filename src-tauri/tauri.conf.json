@@ -20,7 +20,7 @@
         "trafficLightPosition": { "x": 14, "y": 16 },
         "width": 1047,
         "height": 611,
-        "minWidth": 900,
+        "minWidth": 1047,
         "minHeight": 600,
         "visible": true,
         "resizable": true,

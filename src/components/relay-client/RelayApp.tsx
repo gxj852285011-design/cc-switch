@@ -757,7 +757,7 @@ export const RelayApp: React.FC = () => {
   }, [activeExitNodeIdx, exitNodes, showToast]);
 
   return (
-    <div className="w-full h-full bg-[#EFF0F5]/95 backdrop-blur-[10px] flex flex-row items-center p-0 relative overflow-hidden box-border font-sans select-none">
+    <div className="w-full h-full min-w-[1047px] bg-[#EFF0F5]/95 backdrop-blur-[10px] flex flex-row items-center p-0 relative overflow-hidden box-border font-sans select-none">
       
       {/* ==================== 1. 左侧独立导航条 ==================== */}
       <aside className="w-[104px] h-full flex flex-col justify-between items-start p-0 box-border border-r border-slate-200/50 flex-shrink-0 select-none">
@@ -986,23 +986,23 @@ export const RelayApp: React.FC = () => {
             {/* 左侧 Hero 面板 */}
             <div className={`${isDrawerOpen ? 'hero-collapsed' : 'hero-expanded'} h-full flex flex-col justify-between items-start gap-6 select-none flex-shrink-0 box-border`}>
               
-              <div className="w-[312px] flex flex-col items-start gap-6 box-border">
+              <div className="w-full flex flex-col items-start gap-6 box-border">
                 {/* 3D 球体视觉容器 */}
                 <div className="w-[144px] h-[144px] relative origin-left">
                   <img src={SPHERE_3D_BASE64} className="w-[144px] h-[144px] object-contain" alt="3D Sphere" />
                 </div>
 
                 {/* 主标题 */}
-                <div className="flex flex-col items-start gap-6 box-border origin-left">
-                  <div className="w-[251px] h-[29px] flex flex-row items-center">
+                <div className="w-full flex flex-col items-start gap-6 box-border origin-left">
+                  <div className="w-full h-[29px] flex flex-row items-center">
                     <h1 className="font-semibold text-[24px] leading-[29px] text-black whitespace-nowrap">
                       一键接入你的 Agent
                     </h1>
                   </div>
 
                   {/* 特性胶囊 */}
-                  <div className="w-[312px] flex flex-col items-start gap-2 box-border">
-                    <div className="w-[312px] h-[36px] bg-white/40 border border-white/60 rounded-[100px] px-3 py-2 flex flex-row items-center gap-2 box-border">
+                  <div className="w-full flex flex-col items-start gap-2 box-border">
+                    <div className="w-full h-[36px] bg-white/40 border border-white/60 rounded-[100px] px-3 py-2 flex flex-row items-center gap-2 box-border">
                       <svg className="w-4 h-4 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
@@ -1011,7 +1011,7 @@ export const RelayApp: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="w-[312px] h-[36px] bg-white/40 border border-white/60 rounded-[100px] px-3 py-2 flex flex-row items-center gap-2 box-border">
+                    <div className="w-full h-[36px] bg-white/40 border border-white/60 rounded-[100px] px-3 py-2 flex flex-row items-center gap-2 box-border">
                       <svg className="w-4 h-4 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
@@ -1024,10 +1024,10 @@ export const RelayApp: React.FC = () => {
               </div>
 
               {/* 底部操作按钮 */}
-              <div className="w-[271px] h-[48px] flex flex-row items-center gap-2 box-border origin-bottom">
+              <div className="w-full h-[48px] flex flex-row items-center gap-2 box-border origin-bottom">
                 <button
                   onClick={handleConfigureAll}
-                  className="w-[153px] h-[48px] bg-[#0F172A] hover:bg-black text-white rounded-[100px] flex flex-row items-center justify-center px-4 py-3 gap-2 cursor-pointer transition-all whitespace-nowrap flex-shrink-0 select-none shadow-xs active:scale-95"
+                  className="flex-1 h-[48px] bg-[#0F172A] hover:bg-black text-white rounded-[100px] flex flex-row items-center justify-center px-4 py-3 gap-2 cursor-pointer transition-all whitespace-nowrap select-none shadow-xs active:scale-95"
                 >
                   <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 4v16m8-8H4" />
@@ -1036,7 +1036,7 @@ export const RelayApp: React.FC = () => {
                 </button>
                 <button
                   onClick={() => showToast('✅ 运行环境探针已就绪：Node.js、Python 及网络专线延迟正常。')}
-                  className="w-[110px] h-[48px] bg-white/80 hover:bg-white text-black border border-slate-200 rounded-[100px] flex flex-row items-center justify-center px-4 py-3 gap-2 cursor-pointer transition-all whitespace-nowrap flex-shrink-0 select-none"
+                  className="h-[48px] px-4 bg-white/80 hover:bg-white text-black border border-slate-200 rounded-[100px] flex flex-row items-center justify-center gap-2 cursor-pointer transition-all whitespace-nowrap flex-shrink-0 select-none shadow-2xs"
                 >
                   <span className="font-medium text-[14px] leading-[20px] whitespace-nowrap">环境检测</span>
                 </button>
@@ -1045,16 +1045,16 @@ export const RelayApp: React.FC = () => {
             </div>
 
             {/* 主舞台区域 */}
-            <div className="flex-1 h-full pt-[24px] px-[28px] pb-[32px] flex flex-col justify-start items-start gap-4 box-border transition-all duration-500 overflow-hidden">
+            <div className="flex-1 h-full pt-[24px] px-[24px] pb-[32px] flex flex-col justify-start items-start gap-4 box-border transition-all duration-500 overflow-hidden">
               <div className="w-full flex-1 flex flex-row justify-start items-start gap-[16px] box-border transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden">
                 
                 {/* 第 1 列 (高度自动填充并均分容器高度) */}
-                <div id="expanded-col-1" className="w-[260px] min-w-[260px] max-w-[260px] h-full flex flex-col justify-between gap-[14px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 0 }}>
+                <div id="expanded-col-1" className="flex-1 min-w-[250px] max-w-[380px] h-full flex flex-col justify-between gap-[14px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 0 }}>
                   {col1Agents.map(a => (
                     <div
                       key={a.id}
                       onClick={() => handleSelectCard(a.id)}
-                      className="agent-card w-[260px] flex-1 min-h-[135px] bg-white/80 border border-white rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:bg-white hover:scale-[1.01] hover:shadow-xs"
+                      className="agent-card w-full flex-1 min-h-[135px] bg-white/80 border border-white rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:bg-white hover:scale-[1.01] hover:shadow-xs"
                     >
                       <div className="w-full flex flex-row justify-between items-center box-border">
                         <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{a.svg}</div>
@@ -1069,7 +1069,7 @@ export const RelayApp: React.FC = () => {
                       </div>
                       <div className="w-full flex flex-col items-start gap-1 box-border my-auto">
                         <h3 className="font-semibold text-[15px] leading-[19px] text-[#262626] capitalize whitespace-nowrap">{a.title}</h3>
-                        <p className="font-normal text-[12px] leading-[16px] text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-[195px]">{a.sub}</p>
+                        <p className="font-normal text-[12px] leading-[16px] text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis w-full pr-1">{a.sub}</p>
                       </div>
                       {/* 按钮严格区分是否配置 */}
                       <button
@@ -1494,12 +1494,12 @@ export const RelayApp: React.FC = () => {
                 </div>
 
                 {/* 第 2 列 (高度自动填充并均分容器高度) */}
-                <div id="expanded-col-2" className="w-[260px] min-w-[260px] max-w-[260px] h-full flex flex-col justify-between gap-[14px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 2 }}>
+                <div id="expanded-col-2" className="flex-1 min-w-[250px] max-w-[380px] h-full flex flex-col justify-between gap-[14px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 2 }}>
                   {col2Agents.map(a => (
                     <div
                       key={a.id}
                       onClick={() => handleSelectCard(a.id)}
-                      className="agent-card w-[260px] flex-1 min-h-[135px] bg-white/80 border border-white rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:bg-white hover:scale-[1.01] hover:shadow-xs"
+                      className="agent-card w-full flex-1 min-h-[135px] bg-white/80 border border-white rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:bg-white hover:scale-[1.01] hover:shadow-xs"
                     >
                       <div className="w-full flex flex-row justify-between items-center box-border">
                         <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{a.svg}</div>
@@ -1514,7 +1514,7 @@ export const RelayApp: React.FC = () => {
                       </div>
                       <div className="w-full flex flex-col items-start gap-1 box-border my-auto">
                         <h3 className="font-semibold text-[15px] leading-[19px] text-[#262626] capitalize whitespace-nowrap">{a.title}</h3>
-                        <p className="font-normal text-[12px] leading-[16px] text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-[195px]">{a.sub}</p>
+                        <p className="font-normal text-[12px] leading-[16px] text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis w-full pr-1">{a.sub}</p>
                       </div>
                       {/* 按钮严格区分是否配置 */}
                       <button
