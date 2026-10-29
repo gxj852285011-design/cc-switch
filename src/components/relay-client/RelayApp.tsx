@@ -4,7 +4,9 @@ import { SPHERE_3D_BASE64, DEVICE_3D_BASE64 } from './core/constants/assets';
 import { RelayCloudService } from './RelayCloudService';
 import { NetBirdEngineService } from './NetBirdEngineService';
 import { AuthCenterModal } from './features/auth/AuthCenterModal';
-import { CodexIcon, KimiIcon, DoubaoIcon, YuanbaoIcon, TongyiIcon, ZhipuIcon } from '../BrandIcons';
+import { ClaudeIcon, CodexIcon, HermesIcon, OpenClawIcon } from '../BrandIcons';
+import { HotUpdateModal } from './features/updater/HotUpdateModal';
+import { checkForUpdate, type UpdateInfo } from '@/lib/updater';
 
 export type ViewMode = 'home' | 'devices' | 'security';
 export type SecurityVendor = 'openai' | 'global';
@@ -34,85 +36,83 @@ interface AgentCardData {
   downloadUrl?: string;
 }
 
-// 权威精选 6 款知名大厂官方桌面端（知名科技大厂官方桌面客户端，无任何第三方或杂乱脚本）
+// 客户高频 6 大主力工具矩阵（涵盖 Claude、OpenAI/Codex 与顶尖开源 Agent 体系）
 const INITIAL_AGENTS: AgentCardData[] = [
-  // 第一列：国内三大顶尖互联网大厂 AI 桌面端
+  // 第一列：Anthropic 官方体系与顶尖自主 Agent
   {
     id: 1,
-    toolId: 'doubao',
+    toolId: 'claude-desktop',
     category: 'desktop',
-    title: '豆包 桌面端',
-    sub: '字节跳动 官方 AI 桌面端',
+    title: 'Claude 桌面端',
+    sub: 'Anthropic 官方桌面客户端',
     badge: '已安装',
-    isConfigured: false,
+    isConfigured: true,
     col: 1,
-    btnLabel: '配置专线',
-    btnDark: false,
-    desc: '字节跳动旗舰 AI 桌面客户端，支持全能 AI 搜索、智能写作与多模态交互，专线加速直连。',
-    quickCmd: 'open -a Doubao',
-    vendor: 'domestic',
-    needsEgressCheck: false,
+    btnLabel: '已配置',
+    btnDark: true,
+    desc: 'Anthropic 官方桌面客户端，支持端到端项目级上下文交互与 MCP 服务器扩展，专线加速防封。',
+    quickCmd: 'open -a Claude',
+    vendor: 'custom',
+    needsEgressCheck: true,
     isDesktopApp: true,
-    appName: 'Doubao',
-    appPath: '/Applications/Doubao.app',
-    officialWebUrl: 'https://www.doubao.com',
-    svg: <DoubaoIcon size={24} className="w-6 h-6 flex-shrink-0" />
+    appName: 'Claude',
+    appPath: '/Applications/Claude.app',
+    officialWebUrl: 'https://claude.ai/download',
+    svg: <ClaudeIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
   {
     id: 2,
-    toolId: 'kimi',
-    category: 'desktop',
-    title: 'Kimi 桌面端',
-    sub: '月之暗面 官方长文本桌面端',
+    toolId: 'claude',
+    category: 'official',
+    title: 'Claude Code (CLI)',
+    sub: 'Anthropic 终端原生工程 Agent',
     badge: '已安装',
     isConfigured: false,
     col: 1,
     btnLabel: '配置专线',
     btnDark: false,
-    desc: '月之暗面官方长文本与深度文档问答客户端，数十万字长资料秒级解析与全能研报提炼。',
-    quickCmd: 'open -a "Kimi Code"',
-    vendor: 'domestic',
-    needsEgressCheck: false,
-    isDesktopApp: true,
-    appName: 'Kimi Code',
-    appPath: '/Applications/Kimi Code.app',
-    officialWebUrl: 'https://kimi.moonshot.cn',
-    svg: <KimiIcon size={24} className="w-6 h-6 flex-shrink-0" />
+    desc: 'Anthropic 官方终端工程级智能体，全仓代码理解、自动化编辑与重构，一键注入海外专线。',
+    quickCmd: 'claude',
+    installCmd: 'npm install -g @anthropic-ai/claude-code',
+    vendor: 'custom',
+    needsEgressCheck: true,
+    isDesktopApp: false,
+    svg: <ClaudeIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
   {
     id: 3,
-    toolId: 'yuanbao',
+    toolId: 'hermes',
     category: 'desktop',
-    title: '腾讯元宝 桌面端',
-    sub: '腾讯官方 AI 桌面助手',
-    badge: '未安装',
+    title: 'Hermes 客户端',
+    sub: 'Nous Research 顶级开源自主智能体',
+    badge: '已安装',
     isConfigured: false,
     col: 1,
-    btnLabel: '安装客户端',
+    btnLabel: '配置专线',
     btnDark: false,
-    desc: '腾讯混元大模型官方桌面客户端，深度连接微信公众号内容生态与腾讯文档，专业级搜索创作。',
-    quickCmd: 'open -a "腾讯元宝" 2>/dev/null || open -a "Yuanbao" 2>/dev/null || open https://yuanbao.tencent.com',
-    vendor: 'domestic',
-    needsEgressCheck: false,
+    desc: 'Nous Research 顶级开源自主推理智能体，具备长程链式规划与工具协同调用能力，专线加速直连。',
+    quickCmd: 'open -a Hermes 2>/dev/null || hermes',
+    vendor: 'custom',
+    needsEgressCheck: true,
     isDesktopApp: true,
-    appName: '腾讯元宝',
-    appPath: '/Applications/腾讯元宝.app',
-    officialWebUrl: 'https://yuanbao.tencent.com',
-    svg: <YuanbaoIcon size={24} className="w-6 h-6 flex-shrink-0" />
+    appName: 'Hermes',
+    appPath: '/Applications/Hermes.app',
+    officialWebUrl: 'https://nousresearch.com',
+    svg: <HermesIcon size={24} className="w-6 h-6 flex-shrink-0" />
   },
-  // 第二列：全球与国内顶级大厂主流桌面端
+  // 第二列：OpenAI 官方体系 + 开源架构智能体
   {
     id: 4,
     toolId: 'chatgpt',
     category: 'desktop',
-    title: 'ChatGPT 桌面端',
+    title: 'Codex / ChatGPT 桌面端',
     sub: 'OpenAI 官方桌面端 · 已就绪',
     badge: '已安装',
     isConfigured: true,
     col: 2,
     btnLabel: '已配置',
     btnDark: true,
-    desc: 'OpenAI 全球顶尖 AI 桌面应用，深度集成 Canvas 协同画布与语音交互，由纯净海外专线接管。',
+    desc: 'OpenAI 官方原生 AI 桌面应用，深度集成 Canvas 协同画布与语音交互，由纯净海外专线接管出口。',
     quickCmd: 'open -a ChatGPT',
     vendor: 'openai',
     needsEgressCheck: true,
@@ -124,45 +124,43 @@ const INITIAL_AGENTS: AgentCardData[] = [
   },
   {
     id: 5,
-    toolId: 'tongyi',
-    category: 'desktop',
-    title: '通义 桌面端',
-    sub: '阿里巴巴 官方 AI 办公桌面端',
-    badge: '未安装',
+    toolId: 'codex',
+    category: 'official',
+    title: 'Codex CLI',
+    sub: 'OpenAI 官方终端编程智能体',
+    badge: '已安装',
     isConfigured: false,
     col: 2,
-    btnLabel: '安装客户端',
+    btnLabel: '配置专线',
     btnDark: false,
-    desc: '阿里巴巴通义千问官方桌面助手，深度赋能实时会议音视频转写速读与专业级办公创作。',
-    quickCmd: 'open -a "通义" 2>/dev/null || open -a "Qwen" 2>/dev/null || open https://tongyi.aliyun.com',
-    vendor: 'domestic',
-    needsEgressCheck: false,
-    isDesktopApp: true,
-    appName: '通义',
-    appPath: '/Applications/通义.app',
-    officialWebUrl: 'https://tongyi.aliyun.com',
-    svg: <TongyiIcon size={24} className="w-6 h-6 flex-shrink-0" />
+    desc: 'OpenAI 官方终端代码助手，深度集成 GPT-4o / o1 代码推理、补丁生成与自动调试，专线直连。',
+    quickCmd: 'codex',
+    installCmd: 'npm install -g @openai/codex',
+    vendor: 'openai',
+    needsEgressCheck: true,
+    isDesktopApp: false,
+    svg: <CodexIcon size={24} className="w-6 h-6 flex-shrink-0 text-slate-800" />
   },
   {
     id: 6,
-    toolId: 'zhipu',
+    toolId: 'openclaw',
     category: 'desktop',
-    title: '智谱清言 桌面端',
-    sub: '智谱 AI / GLM 官方桌面端',
-    badge: '未安装',
+    title: 'OpenClaw 客户端',
+    sub: '全自主工程架构智能体',
+    badge: '已安装',
     isConfigured: false,
     col: 2,
-    btnLabel: '安装客户端',
+    btnLabel: '配置专线',
     btnDark: false,
-    desc: '清华系顶尖大模型官方桌面客户端，拥有超强中文代码与逻辑分析能力，内置丰富智能体生态。',
-    quickCmd: 'open -a "智谱清言" 2>/dev/null || open -a "ChatGLM" 2>/dev/null || open https://chatglm.cn',
-    vendor: 'domestic',
+    desc: '开源全自主工程智能体，支持多步代码审查、架构重构与自动化测试用例生成，开箱即用。',
+    quickCmd: 'open -a OpenClaw 2>/dev/null || openclaw',
+    vendor: 'custom',
     needsEgressCheck: false,
     isDesktopApp: true,
-    appName: '智谱清言',
-    appPath: '/Applications/智谱清言.app',
-    officialWebUrl: 'https://chatglm.cn',
-    svg: <ZhipuIcon size={24} className="w-6 h-6 flex-shrink-0" />
+    appName: 'OpenClaw',
+    appPath: '/Applications/OpenClaw.app',
+    officialWebUrl: 'https://github.com/openclaw/openclaw',
+    svg: <OpenClawIcon size={24} className="w-6 h-6 flex-shrink-0" />
   }
 ];
 
@@ -177,7 +175,7 @@ const getInitialConfiguredIds = (): number[] => {
       if (Array.isArray(parsed)) return parsed;
     }
   } catch {}
-  return [4]; // ChatGPT 桌面端默认已配置专线
+  return [1, 4]; // Claude 桌面端与 Codex/ChatGPT 桌面端默认已就绪
 };
 
 export const RelayApp: React.FC = () => {
@@ -210,9 +208,12 @@ export const RelayApp: React.FC = () => {
   // 3. 设备管理状态
   const [selectedDeviceId, setSelectedDeviceId] = useState<number>(1);
   const [deviceKeyStatusMap, setDeviceKeyStatusMap] = useState<Record<string, boolean>>({
+    'key_claude_desktop': true,
+    'key_claude_cli': true,
+    'key_hermes': true,
     'key_chatgpt': true,
-    'key_doubao': true,
-    'key_kimi': true
+    'key_codex_cli': true,
+    'key_openclaw': true
   });
 
   // 4. 网络防封中心状态
@@ -225,6 +226,24 @@ export const RelayApp: React.FC = () => {
   // 动态风险统计
   const highRiskCount = isIpv6Blocked ? 0 : 1;
   const passedCount = isIpv6Blocked ? 3 : 2;
+
+  // 5. 应用原生热更新状态
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
+  const [hasPendingUpdate, setHasPendingUpdate] = useState<boolean>(false);
+  const [pendingUpdateInfo, setPendingUpdateInfo] = useState<UpdateInfo | null>(null);
+
+  // 启动 2 秒后静默检查热更新
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkForUpdate({ timeout: 10000 }).then(res => {
+        if (res.status === 'available') {
+          setPendingUpdateInfo(res.info);
+          setHasPendingUpdate(true);
+        }
+      }).catch(() => {});
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // 5. 账号中转站认证状态
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
@@ -280,20 +299,18 @@ export const RelayApp: React.FC = () => {
       let cliVersions: Array<{ name: string; version: string | null }> = [];
       try {
         cliVersions = await invoke('get_tool_versions', {
-          tools: ['hermes', 'codex', 'kimi', 'openclaw']
+          tools: ['claude', 'codex', 'hermes', 'openclaw']
         });
       } catch (e) {
         console.warn('CLI probe error:', e);
       }
 
-      // 2. 探测知名大厂桌面图形客户端（macOS /Applications/）
+      // 2. 探测桌面图形客户端（macOS /Applications/）
       const desktopApps = [
-        { id: 1, appName: 'Doubao', path: '/Applications/Doubao.app' },
-        { id: 2, appName: 'Kimi Code', path: '/Applications/Kimi Code.app' },
-        { id: 3, appName: '腾讯元宝', path: '/Applications/腾讯元宝.app' },
+        { id: 1, appName: 'Claude', path: '/Applications/Claude.app' },
+        { id: 3, appName: 'Hermes', path: '/Applications/Hermes.app' },
         { id: 4, appName: 'ChatGPT', path: '/Applications/ChatGPT.app' },
-        { id: 5, appName: '通义', path: '/Applications/通义.app' },
-        { id: 6, appName: '智谱清言', path: '/Applications/智谱清言.app' }
+        { id: 6, appName: 'OpenClaw', path: '/Applications/OpenClaw.app' }
       ];
       const desktopResults: Record<number, boolean> = {};
       for (const d of desktopApps) {
@@ -714,6 +731,29 @@ export const RelayApp: React.FC = () => {
 
         </div>
 
+        {/* 原生热更新入口 */}
+        <div className="w-[104px] px-3 pb-2 flex flex-col items-center">
+          <button
+            onClick={() => setIsUpdateModalOpen(true)}
+            className="w-[84px] h-[32px] rounded-xl flex items-center justify-center gap-1.5 text-[11px] font-medium transition-all cursor-pointer border border-slate-200/60 bg-white/70 hover:bg-white text-slate-700 shadow-2xs active:scale-95 group relative"
+            title="点击检查原生应用热更新"
+          >
+            {hasPendingUpdate ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                <span className="text-orange-600 font-semibold">发现新版</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5 text-slate-700 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>热更新</span>
+              </>
+            )}
+          </button>
+        </div>
+
         {/* 左下角用户名称 */}
         <div className="w-[104px] h-[56px] px-3 py-4 flex flex-row items-center justify-between gap-2 box-border flex-shrink-0">
           <div
@@ -763,12 +803,26 @@ export const RelayApp: React.FC = () => {
             </span>
           </div>
 
-          {/* 右侧功能组件: 专线指示 + 帮助 + 主题切换 */}
+          {/* 右侧功能组件: 专线指示 + 热更新 + 帮助 + 主题切换 */}
           <div className="flex flex-row items-center gap-3">
             <span className="text-[11px] font-medium text-emerald-800 bg-emerald-50 border border-emerald-200/80 rounded-full px-3 py-1 flex items-center gap-1.5 select-none whitespace-nowrap">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>NetBird WireGuard (100.64.0.12 · 官方直连零解密)</span>
             </span>
+
+            {/* 热更新状态胶囊 */}
+            <button
+              onClick={() => setIsUpdateModalOpen(true)}
+              className={`text-[11px] font-medium rounded-full px-3 py-1 flex items-center gap-1.5 select-none transition-all cursor-pointer border shadow-2xs active:scale-95 ${
+                hasPendingUpdate
+                  ? 'text-orange-800 bg-orange-50/90 border-orange-300 animate-pulse'
+                  : 'text-slate-700 bg-white/80 border-slate-200/80 hover:bg-white'
+              }`}
+              title="检查或应用原生应用热更新"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${hasPendingUpdate ? 'bg-orange-500' : 'bg-emerald-500'}`}></span>
+              <span>{hasPendingUpdate ? `🔥 发现新版 v${pendingUpdateInfo?.availableVersion}` : '热更新就绪'}</span>
+            </button>
 
             {/* 帮助中心按钮 */}
             <button
@@ -1417,9 +1471,12 @@ export const RelayApp: React.FC = () => {
               {/* Key 矩阵卡片 */}
               <div className="w-full flex flex-col gap-3">
                 {[
-                  { id: 'key_chatgpt', tool: 'ChatGPT 桌面端', key: 'sk-relay-1006-chat...8831', statusKey: 'key_chatgpt' },
-                  { id: 'key_doubao', tool: '豆包 桌面端', key: 'sk-relay-1007-doub...4419', statusKey: 'key_doubao' },
-                  { id: 'key_kimi', tool: 'Kimi 桌面端', key: 'sk-relay-1008-kimi...1102', statusKey: 'key_kimi' }
+                  { id: 'key_claude_desktop', tool: 'Claude 桌面端', key: 'sk-relay-1001-cld...8831', statusKey: 'key_claude_desktop' },
+                  { id: 'key_claude_cli', tool: 'Claude Code (CLI)', key: 'sk-relay-1002-cld...4419', statusKey: 'key_claude_cli' },
+                  { id: 'key_hermes', tool: 'Hermes 客户端', key: 'sk-relay-1003-her...3312', statusKey: 'key_hermes' },
+                  { id: 'key_chatgpt', tool: 'Codex / ChatGPT 桌面端', key: 'sk-relay-1004-gpt...1102', statusKey: 'key_chatgpt' },
+                  { id: 'key_codex_cli', tool: 'Codex CLI', key: 'sk-relay-1005-cdx...9902', statusKey: 'key_codex_cli' },
+                  { id: 'key_openclaw', tool: 'OpenClaw 客户端', key: 'sk-relay-1006-ocw...7741', statusKey: 'key_openclaw' }
                 ].map(item => {
                   const isActive = deviceKeyStatusMap[item.statusKey] ?? true;
                   return (
@@ -1722,6 +1779,14 @@ export const RelayApp: React.FC = () => {
           showToast('🔒 已安全登出中转站账号');
         }}
         onShowToast={showToast}
+      />
+
+      {/* 原生应用热更新弹窗 */}
+      <HotUpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        onSuccessToast={showToast}
+        initialUpdateInfo={pendingUpdateInfo}
       />
 
       {toastMessage && (

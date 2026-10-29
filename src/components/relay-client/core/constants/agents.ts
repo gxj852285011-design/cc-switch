@@ -21,93 +21,93 @@ export interface AgentConfig {
 export const ALL_AGENTS: AgentConfig[] = [
   {
     id: 1,
-    toolId: 'doubao' as unknown as ToolId,
-    category: 'domestic',
-    title: '豆包 桌面端',
-    sub: '字节跳动 官方 AI 桌面端',
+    toolId: 'claude-desktop',
+    category: 'desktop',
+    title: 'Claude 桌面端',
+    sub: 'Anthropic 官方桌面客户端',
     badge: '已安装',
     col: 1,
     btnLabel: '配置专线',
     btnDark: false,
-    quickCmd: 'open -a Doubao',
-    guide: '字节跳动旗舰 AI 桌面客户端，全能 AI 搜索、智能写作与多模态交互，专线加速直连。',
+    quickCmd: 'open -a Claude',
+    guide: 'Anthropic 官方桌面应用，原生支持全仓项目交互、MCP 工具服务器扩展，纯净海外专线加速防封。',
     detected: true,
-    iconType: 'domestic' as unknown as AgentIconType
+    iconType: 'claude'
   },
   {
     id: 2,
-    toolId: 'kimi',
-    category: 'domestic',
-    title: 'Kimi 桌面端',
-    sub: '月之暗面 官方长文本桌面端',
+    toolId: 'claude',
+    category: 'official',
+    title: 'Claude Code (CLI)',
+    sub: 'Anthropic 终端原生工程 Agent',
     badge: '已安装',
     col: 1,
     btnLabel: '配置专线',
     btnDark: false,
-    quickCmd: 'open -a "Kimi Code"',
-    guide: '月之暗面官方长文本与深度文档问答客户端，数十万字长资料秒级解析与全能研报提炼。',
+    quickCmd: 'claude',
+    guide: 'Anthropic 官方终端智能体，擅长复杂工程全仓代码理解与端到端自动化实现，一键注入海外专线。',
     detected: true,
-    iconType: 'kimi'
+    iconType: 'claude'
   },
   {
     id: 3,
-    toolId: 'yuanbao' as unknown as ToolId,
-    category: 'domestic',
-    title: '腾讯元宝 桌面端',
-    sub: '腾讯官方 AI 桌面助手',
-    badge: '未安装',
-    col: 1,
-    btnLabel: '安装客户端',
-    btnDark: false,
-    quickCmd: 'open -a "腾讯元宝"',
-    guide: '腾讯混元大模型官方桌面客户端，深度连接微信公众号生态与腾讯文档，专业级搜索创作。',
-    detected: false,
-    iconType: 'domestic' as unknown as AgentIconType
-  },
-  {
-    id: 4,
-    toolId: 'codex-desktop' as unknown as ToolId,
+    toolId: 'chatgpt',
     category: 'desktop',
-    title: 'ChatGPT 桌面端',
+    title: 'Codex / ChatGPT 桌面端',
     sub: 'OpenAI 官方桌面端 · 已就绪',
     badge: '已安装',
-    col: 2,
+    col: 1,
     btnLabel: '已配置',
     btnDark: true,
     quickCmd: 'open -a ChatGPT',
-    guide: 'OpenAI 全球顶尖 AI 桌面应用，深度集成 Canvas 协同画布与语音交互，由纯净海外专线接管。',
+    guide: 'OpenAI 官方原生 AI 桌面应用，深度集成 Canvas 协同画布与语音交互，由纯净海外专线接管出口。',
+    detected: true,
+    iconType: 'openai'
+  },
+  {
+    id: 4,
+    toolId: 'codex',
+    category: 'official',
+    title: 'Codex CLI',
+    sub: 'OpenAI 官方终端编程智能体',
+    badge: '已安装',
+    col: 2,
+    btnLabel: '配置专线',
+    btnDark: false,
+    quickCmd: 'codex',
+    guide: 'OpenAI 官方终端代码助手，深度集成 GPT-4o / o1 代码推理、补丁生成与自动调试，专线直连。',
     detected: true,
     iconType: 'openai'
   },
   {
     id: 5,
-    toolId: 'tongyi' as unknown as ToolId,
-    category: 'domestic',
-    title: '通义 桌面端',
-    sub: '阿里巴巴 官方 AI 办公桌面端',
-    badge: '未安装',
+    toolId: 'hermes',
+    category: 'desktop',
+    title: 'Hermes 客户端',
+    sub: 'Nous Research 顶级开源自主智能体',
+    badge: '已安装',
     col: 2,
-    btnLabel: '安装客户端',
+    btnLabel: '配置专线',
     btnDark: false,
-    quickCmd: 'open -a "通义"',
-    guide: '阿里巴巴通义千问官方桌面助手，深度赋能实时会议音视频转写速读与专业级办公创作。',
-    detected: false,
-    iconType: 'domestic' as unknown as AgentIconType
+    quickCmd: 'open -a Hermes 2>/dev/null || hermes',
+    guide: 'Nous Research 顶级开源自主推理智能体，具备长程链式规划与工具协同调用能力，专线加速直连。',
+    detected: true,
+    iconType: 'hermes'
   },
   {
     id: 6,
-    toolId: 'zhipu' as unknown as ToolId,
-    category: 'domestic',
-    title: '智谱清言 桌面端',
-    sub: '智谱 AI / GLM 官方桌面端',
-    badge: '未安装',
+    toolId: 'openclaw',
+    category: 'desktop',
+    title: 'OpenClaw 客户端',
+    sub: '全自主工程架构智能体',
+    badge: '已安装',
     col: 2,
-    btnLabel: '安装客户端',
+    btnLabel: '配置专线',
     btnDark: false,
-    quickCmd: 'open -a "智谱清言"',
-    guide: '清华系顶尖大模型官方桌面客户端，拥有超强中文代码与逻辑分析能力，内置丰富智能体生态。',
-    detected: false,
-    iconType: 'domestic' as unknown as AgentIconType
+    quickCmd: 'open -a OpenClaw 2>/dev/null || openclaw',
+    guide: '开源代码审查与多步自主架构重构引擎，具备严苛红队代码审查能力，开箱即用。',
+    detected: true,
+    iconType: 'claw'
   }
 ];
 
@@ -122,24 +122,24 @@ export interface DeviceKeyModel {
 }
 
 export const INITIAL_DEVICE_KEYS: DeviceKeyModel[] = [
-  { id: 1, keyId: 'key_gpt_01', toolId: 'codex-desktop' as unknown as ToolId, title: 'ChatGPT 桌面端', key: 'sk-relay-gpt...8f1a', status: 'active', iconType: 'openai' },
-  { id: 2, keyId: 'key_dou_01', toolId: 'doubao' as unknown as ToolId, title: '豆包 桌面端', key: 'sk-relay-dou...990e', status: 'active', iconType: 'domestic' as unknown as AgentIconType },
-  { id: 3, keyId: 'key_kim_01', toolId: 'kimi', title: 'Kimi 桌面端', key: 'sk-relay-kim...4e2f', status: 'active', iconType: 'kimi' },
-  { id: 4, keyId: 'key_yba_01', toolId: 'yuanbao' as unknown as ToolId, title: '腾讯元宝 桌面端', key: 'sk-relay-yba...3a1c', status: 'disabled', iconType: 'domestic' as unknown as AgentIconType },
-  { id: 5, keyId: 'key_tyi_01', toolId: 'tongyi' as unknown as ToolId, title: '通义 桌面端', key: 'sk-relay-tyi...7b90', status: 'disabled', iconType: 'domestic' as unknown as AgentIconType },
-  { id: 6, keyId: 'key_zpu_01', toolId: 'zhipu' as unknown as ToolId, title: '智谱清言 桌面端', key: 'sk-relay-zpu...11d2', status: 'disabled', iconType: 'domestic' as unknown as AgentIconType },
+  { id: 1, keyId: 'key_cld_desk', toolId: 'claude-desktop', title: 'Claude 桌面端', key: 'sk-relay-cld...8f1a', status: 'active', iconType: 'claude' },
+  { id: 2, keyId: 'key_cld_cli', toolId: 'claude', title: 'Claude Code (CLI)', key: 'sk-relay-cld...990e', status: 'active', iconType: 'claude' },
+  { id: 3, keyId: 'key_gpt_desk', toolId: 'chatgpt', title: 'Codex / ChatGPT 桌面端', key: 'sk-relay-gpt...4e2f', status: 'active', iconType: 'openai' },
+  { id: 4, keyId: 'key_cdx_cli', toolId: 'codex', title: 'Codex CLI', key: 'sk-relay-cdx...3a1c', status: 'active', iconType: 'openai' },
+  { id: 5, keyId: 'key_hermes', toolId: 'hermes', title: 'Hermes 客户端', key: 'sk-relay-her...7b90', status: 'active', iconType: 'hermes' },
+  { id: 6, keyId: 'key_claw', toolId: 'openclaw', title: 'OpenClaw 客户端', key: 'sk-relay-ocw...11d2', status: 'active', iconType: 'claw' },
 ];
 
 export const DEVICES = [
-  { id: 1, name: 'MacBook Pro (高相健)', tag: '本机', keysCount: 3, status: 'online' },
-  { id: 2, name: 'Mac Studio (办公室)', tag: '远端', keysCount: 2, status: 'online' },
+  { id: 1, name: 'MacBook Pro (高相健)', tag: '本机', keysCount: 4, status: 'online' },
+  { id: 2, name: 'Mac Studio (办公室)', tag: '远端', keysCount: 3, status: 'online' },
   { id: 3, name: 'Mac Mini (构建机)', tag: '远端', keysCount: 2, status: 'offline' },
-  { id: 4, name: 'Ubuntu Server (AI 专线节点)', tag: '远端', keysCount: 3, status: 'online' },
+  { id: 4, name: 'Ubuntu Server (AI 专线节点)', tag: '远端', keysCount: 4, status: 'online' },
 ];
 
 export const CATEGORY_TABS: { id: ToolCategory; label: string; count: number }[] = [
   { id: 'all', label: '全部', count: 6 },
-  { id: 'desktop', label: '知名大厂桌面端', count: 6 },
-  { id: 'official', label: '国际大厂', count: 1 },
-  { id: 'domestic', label: '国内大厂', count: 5 }
+  { id: 'desktop', label: '桌面端 GUI', count: 4 },
+  { id: 'official', label: '终端 CLI', count: 2 },
+  { id: 'opensource', label: '开源智能体', count: 2 }
 ];

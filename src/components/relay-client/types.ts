@@ -7,6 +7,8 @@ export type ToolId =
   | 'opencode' 
   | 'openclaw' 
   | 'claude-desktop' 
+  | 'codex-desktop'
+  | 'chatgpt'
   | 'hermes' 
   | 'pi' 
   | 'omp' 
