@@ -164,8 +164,58 @@ const INITIAL_AGENTS: AgentCardData[] = [
   }
 ];
 
+export interface DeviceKeyItem {
+  id: string;
+  tool: string;
+  toolId: string;
+  key: string;
+  statusKey: string;
+  deviceId: number; // 1: MacBook Pro (本机工作站), 2: iPhone 16 Pro, 3: Ubuntu GPU Server
+  agentId?: number;
+}
+
 // 专线配置状态本地持久化存储 Key
 const STORAGE_KEY_CONFIGURED = 'relay_configured_agent_ids_v4';
+const STORAGE_KEY_DEVICE_KEYS = 'relay_device_keys_v4';
+const STORAGE_KEY_DEVICE_KEY_STATUS = 'relay_device_key_status_v4';
+
+const buildDeviceKeyForAgent = (agent: AgentCardData): DeviceKeyItem => ({
+  id: `key_${agent.toolId}`,
+  tool: agent.title,
+  toolId: agent.toolId,
+  key: `sk-relay-${agent.toolId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6)}-mbp-88`,
+  statusKey: `key_${agent.toolId}`,
+  deviceId: 1,
+  agentId: agent.id
+});
+
+// 预设远端协同设备凭证（供多端联动展示）
+const DEFAULT_REMOTE_DEVICE_KEYS: DeviceKeyItem[] = [
+  {
+    id: 'key_iphone_chatgpt',
+    tool: 'ChatGPT iOS 客户端',
+    toolId: 'chatgpt',
+    key: 'sk-relay-chatgp-ios-01',
+    statusKey: 'key_iphone_chatgpt',
+    deviceId: 2
+  },
+  {
+    id: 'key_ubuntu_codex',
+    tool: 'Codex CLI (Linux GPU 集群)',
+    toolId: 'codex',
+    key: 'sk-relay-codex-linux-gpu-01',
+    statusKey: 'key_ubuntu_codex',
+    deviceId: 3
+  },
+  {
+    id: 'key_ubuntu_openclaw',
+    tool: 'OpenClaw Daemon (远端构建机)',
+    toolId: 'openclaw',
+    key: 'sk-relay-openclaw-srv-02',
+    statusKey: 'key_ubuntu_openclaw',
+    deviceId: 3
+  }
+];
 
 const getInitialConfiguredIds = (): number[] => {
   try {
@@ -176,6 +226,53 @@ const getInitialConfiguredIds = (): number[] => {
     }
   } catch {}
   return [1, 4]; // Claude 桌面端与 Codex/ChatGPT 桌面端默认已就绪
+};
+
+const getInitialDeviceKeys = (initIds: number[]): DeviceKeyItem[] => {
+  let loadedKeys: DeviceKeyItem[] = [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_DEVICE_KEYS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        loadedKeys = parsed;
+      }
+    }
+  } catch {}
+
+  // 必须确保所有当前已配置 (isConfigured) 的 Agent 均存在于本机工作站 (deviceId: 1) 的 Key 矩阵中
+  const configuredAgents = INITIAL_AGENTS.filter(a => initIds.includes(a.id));
+  const configuredKeys = configuredAgents.map(buildDeviceKeyForAgent);
+
+  const existingLocalMap = new Map(
+    loadedKeys.filter(k => k.deviceId === 1).map(k => [k.agentId || k.toolId, k])
+  );
+
+  const mergedLocalKeys = [
+    ...loadedKeys.filter(k => k.deviceId === 1),
+    ...configuredKeys.filter(k => !existingLocalMap.has(k.agentId || k.toolId))
+  ];
+
+  const remoteKeys = loadedKeys.some(k => k.deviceId !== 1)
+    ? loadedKeys.filter(k => k.deviceId !== 1)
+    : DEFAULT_REMOTE_DEVICE_KEYS;
+
+  const result = [...mergedLocalKeys, ...remoteKeys];
+  try {
+    localStorage.setItem(STORAGE_KEY_DEVICE_KEYS, JSON.stringify(result));
+  } catch {}
+  return result;
+};
+
+const getInitialDeviceKeyStatusMap = (): Record<string, boolean> => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_DEVICE_KEY_STATUS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed !== null) return parsed;
+    }
+  } catch {}
+  return {};
 };
 
 export const RelayApp: React.FC = () => {
@@ -207,8 +304,18 @@ export const RelayApp: React.FC = () => {
 
   // 3. 设备管理状态
   const [selectedDeviceId, setSelectedDeviceId] = useState<number>(1);
-  const [deviceKeys, setDeviceKeys] = useState<{ id: string; tool: string; key: string; statusKey: string }[]>([]);
-  const [deviceKeyStatusMap, setDeviceKeyStatusMap] = useState<Record<string, boolean>>({});
+  const [deviceKeys, setDeviceKeys] = useState<DeviceKeyItem[]>(() => getInitialDeviceKeys(getInitialConfiguredIds()));
+  const [deviceKeyStatusMap, setDeviceKeyStatusMap] = useState<Record<string, boolean>>(getInitialDeviceKeyStatusMap);
+
+  const updateDeviceKeys = useCallback((updater: (prev: DeviceKeyItem[]) => DeviceKeyItem[]) => {
+    setDeviceKeys(prev => {
+      const next = updater(prev);
+      try {
+        localStorage.setItem(STORAGE_KEY_DEVICE_KEYS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   // 4. 网络防封中心状态
   const [securityVendor, setSecurityVendor] = useState<SecurityVendor>('openai');
@@ -271,6 +378,13 @@ export const RelayApp: React.FC = () => {
   const activeAgent = useMemo(() => {
     return agents.find(a => a.id === selectedCardId) || agents[0];
   }, [agents, selectedCardId]);
+
+  const activeKeyItem = useMemo(() => {
+    return deviceKeys.find(k => k.deviceId === 1 && (k.agentId === activeAgent.id || k.toolId === activeAgent.toolId));
+  }, [deviceKeys, activeAgent]);
+
+  const displayKey = activeKeyItem ? activeKeyItem.key : `sk-relay-${activeAgent.toolId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6)}-mbp-88`;
+  const isKeyActive = activeKeyItem ? (deviceKeyStatusMap[activeKeyItem.statusKey] ?? true) : activeAgent.isConfigured;
 
   const col1Agents = useMemo(() => agents.filter(a => a.col === 1), [agents]);
   const col2Agents = useMemo(() => agents.filter(a => a.col === 2), [agents]);
@@ -359,7 +473,7 @@ export const RelayApp: React.FC = () => {
     refreshInstalledAgents();
   }, [refreshInstalledAgents]);
 
-  // 单个 Agent 注入/配置专线通道（状态同步流转与本地持久化）
+  // 单个 Agent 注入/配置专线通道（状态同步流转、设备管理 Key 矩阵同步与本地持久化）
   const handleConfigureRelay = useCallback((agentId: number) => {
     const target = agents.find(a => a.id === agentId);
     const title = target?.title || 'Agent';
@@ -384,10 +498,18 @@ export const RelayApp: React.FC = () => {
       return a;
     }));
 
-    showToast(`🎉 已成功为 ${title} 注入海外专线配置！当前状态：已配置`);
-  }, [agents, showToast]);
+    if (target) {
+      updateDeviceKeys(prev => {
+        const alreadyHas = prev.some(k => k.deviceId === 1 && (k.agentId === agentId || k.toolId === target.toolId));
+        if (alreadyHas) return prev;
+        return [buildDeviceKeyForAgent(target), ...prev];
+      });
+    }
 
-  // 一键配置所有已就绪 Agent 专线
+    showToast(`🎉 已成功为 ${title} 注入海外专线配置！已同步至设备管理`);
+  }, [agents, showToast, updateDeviceKeys]);
+
+  // 一键配置所有已就绪 Agent 专线并全量同步设备管理 Key 矩阵
   const handleConfigureAll = useCallback(() => {
     const readyAgents = agents.filter(a => a.badge === '已安装');
     if (readyAgents.length === 0) {
@@ -417,15 +539,14 @@ export const RelayApp: React.FC = () => {
       return a;
     }));
 
-    setDeviceKeys(readyAgents.map(a => ({
-      id: `key_${a.toolId}`,
-      tool: a.title,
-      key: `sk-relay-${a.toolId.slice(0, 4)}...${Math.random().toString(36).slice(2, 6)}`,
-      statusKey: `key_${a.toolId}`
-    })));
+    updateDeviceKeys(prev => {
+      const remoteKeys = prev.filter(k => k.deviceId !== 1);
+      const newLocalKeys = readyAgents.map(buildDeviceKeyForAgent);
+      return [...newLocalKeys, ...remoteKeys];
+    });
 
-    showToast(`🎉 所有已安装 Agent 专线已全部配置生效！(${readyAgents.length} 款)`);
-  }, [agents, showToast]);
+    showToast(`🎉 所有已安装 Agent 专线已全部配置生效！(${readyAgents.length} 款) 已同步至设备管理`);
+  }, [agents, showToast, updateDeviceKeys]);
 
   // 唤醒 / 启动 macOS 桌面客户端应用
   const handleOpenDesktopApp = useCallback(async (agent: AgentCardData) => {
@@ -1112,6 +1233,25 @@ export const RelayApp: React.FC = () => {
                           <p className="text-[11px] text-slate-500 leading-[16px] m-0">
                             AI Agent Hub 会为本地桌面客户端自动配置透明网络分流，API 请求由专线出口接管，避免海外服务地域阻断与 403 风险。
                           </p>
+                          <div className="flex flex-col gap-1.5 text-[11px] text-slate-600 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-400">本机设备 Key:</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-[10px] font-medium ${isKeyActive ? 'text-emerald-700' : 'text-slate-400'}`}>
+                                  {isKeyActive ? '生效中' : (activeAgent.isConfigured ? '已停用' : '待配置')}
+                                </span>
+                                <span className="font-mono text-slate-600 text-[10px] bg-white px-2 py-0.5 rounded border border-slate-200">
+                                  {displayKey}
+                                </span>
+                                <button
+                                  onClick={() => copyToClipboard(displayKey, '📋 已复制专线凭证 Key')}
+                                  className="text-[10px] text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+                                >
+                                  复制
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                           <div className="flex items-center gap-2 pt-1">
                             <button
                               onClick={() => handleConfigureRelay(activeAgent.id)}
@@ -1280,10 +1420,20 @@ export const RelayApp: React.FC = () => {
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-slate-400">使用授权:</span>
+                                  <span className="text-slate-400">本机设备 Key:</span>
                                   <div className="flex items-center gap-1.5">
-                                    <span className="text-[#262626] font-medium">{activeAgent.isConfigured ? '生效中' : '待配置'}</span>
-                                    <span className="font-mono text-slate-500 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">sk-relay-1006</span>
+                                    <span className={`text-[10px] font-medium ${isKeyActive ? 'text-emerald-700' : 'text-slate-400'}`}>
+                                      {isKeyActive ? '生效中' : (activeAgent.isConfigured ? '已停用' : '待配置')}
+                                    </span>
+                                    <span className="font-mono text-slate-600 text-[10px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                      {displayKey}
+                                    </span>
+                                    <button
+                                      onClick={() => copyToClipboard(displayKey, '📋 已复制专线凭证 Key')}
+                                      className="text-[10px] text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+                                    >
+                                      复制
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -1395,147 +1545,175 @@ export const RelayApp: React.FC = () => {
         {/* ========================================================================= */}
         {/* B. 设备管理视图 (左右布局 + 密钥启用/停用 + 新建设备) */}
         {/* ========================================================================= */}
-        {viewMode === 'devices' && (
-          <div className="w-full flex-1 flex flex-row items-start justify-start p-0 box-border overflow-hidden">
-            {/* 左侧设备选择 */}
-            <div className="w-[360px] h-full p-6 flex flex-col justify-between items-start gap-6 select-none flex-shrink-0 box-border border-r border-slate-200/50">
-              <div className="w-[312px] flex flex-col items-start gap-6 box-border">
-                <div className="w-[120px] h-[120px] relative">
-                  <img src={DEVICE_3D_BASE64} className="w-[120px] h-[120px] object-contain" alt="Cloud Device Keys" />
-                </div>
-                <div className="w-[312px] flex flex-col items-start gap-4 box-border">
-                  <h1 className="font-medium text-[24px] leading-[29px] text-black whitespace-nowrap">
-                    云端管理设备 key
-                  </h1>
-                  <div className="w-[312px] flex flex-col items-start gap-3 box-border overflow-y-auto no-scrollbar">
-                    {/* 设备 1: MacBook Pro */}
-                    <div
-                      onClick={() => setSelectedDeviceId(1)}
-                      className={`w-[312px] p-4 px-6 rounded-[32px] border transition-all cursor-pointer flex flex-col gap-3 ${
-                        selectedDeviceId === 1 ? 'bg-white border-[#9BC3FF] shadow-xs' : 'bg-white/60 border-white hover:bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-semibold text-slate-900 text-sm">MacBook Pro (本机工作站)</span>
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      </div>
-                      <span className="text-xs text-slate-400">{deviceKeys.length} keys · 当前本机</span>
-                    </div>
+        {viewMode === 'devices' && (() => {
+          const localKeys = deviceKeys.filter(k => k.deviceId === 1);
+          const iphoneKeys = deviceKeys.filter(k => k.deviceId === 2);
+          const ubuntuKeys = deviceKeys.filter(k => k.deviceId === 3);
+          const currentVisibleKeys = deviceKeys.filter(k => k.deviceId === selectedDeviceId);
 
-                    {/* 设备 2: iPhone 16 Pro */}
-                    <div
-                      onClick={() => setSelectedDeviceId(2)}
-                      className={`w-[312px] p-4 px-6 rounded-[32px] border transition-all cursor-pointer flex flex-col gap-3 ${
-                        selectedDeviceId === 2 ? 'bg-white border-[#9BC3FF] shadow-xs' : 'bg-white/60 border-white hover:bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-semibold text-slate-900 text-sm">iPhone 16 Pro</span>
-                        <span className="w-2 h-2 rounded-full bg-slate-300"></span>
-                      </div>
-                      <span className="text-xs text-slate-400">1 keys · 移动端同步中</span>
-                    </div>
-
-                    {/* 设备 3: Ubuntu Dev Server */}
-                    <div
-                      onClick={() => setSelectedDeviceId(3)}
-                      className={`w-[312px] p-4 px-6 rounded-[32px] border transition-all cursor-pointer flex flex-col gap-3 ${
-                        selectedDeviceId === 3 ? 'bg-white border-[#9BC3FF] shadow-xs' : 'bg-white/60 border-white hover:bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-semibold text-slate-900 text-sm">Ubuntu GPU Server</span>
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      </div>
-                      <span className="text-xs text-slate-400">2 keys · 云端训练中继节点</span>
-                    </div>
+          return (
+            <div className="w-full flex-1 flex flex-row items-start justify-start p-0 box-border overflow-hidden">
+              {/* 左侧设备选择 */}
+              <div className="w-[360px] h-full p-6 flex flex-col justify-between items-start gap-6 select-none flex-shrink-0 box-border border-r border-slate-200/50">
+                <div className="w-[312px] flex flex-col items-start gap-6 box-border">
+                  <div className="w-[120px] h-[120px] relative">
+                    <img src={DEVICE_3D_BASE64} className="w-[120px] h-[120px] object-contain" alt="Cloud Device Keys" />
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 右侧设备 Key 详情列表 */}
-            <div className="flex-1 h-full p-8 flex flex-col justify-start items-start gap-4 box-border overflow-y-auto no-scrollbar">
-              <div className="flex items-center justify-between w-full pb-3 border-b border-slate-200/60">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">当前设备活跃 Key 矩阵</h2>
-                  <p className="text-xs text-slate-400">在云端针对单项工具一键切换失效或生效，杜绝 Key 泄露风险</p>
-                </div>
-                <button
-                  onClick={() => {
-                    const newId = `key_${Date.now()}`;
-                    setDeviceKeys(prev => [
-                      ...prev,
-                      {
-                        id: newId,
-                        tool: '自定义智能体专线',
-                        key: `sk-relay-agent...${Math.random().toString(36).slice(2, 6)}`,
-                        statusKey: newId
-                      }
-                    ]);
-                    showToast('🔑 已成功为当前设备新建专线专用 API Key');
-                  }}
-                  className="h-9 px-4 rounded-full bg-[#0F172A] hover:bg-black text-white text-xs font-medium cursor-pointer transition-all shadow-xs"
-                >
-                  + 新建设备 Key
-                </button>
-              </div>
-
-              {/* Key 矩阵卡片 */}
-              <div className="w-full flex flex-col gap-3">
-                {deviceKeys.length === 0 ? (
-                  <div className="w-full py-12 flex flex-col items-center justify-center text-center bg-white/60 rounded-3xl border border-dashed border-slate-200">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3 text-lg">
-                      🔑
-                    </div>
-                    <span className="text-sm font-semibold text-slate-700">暂无活跃设备专线凭证</span>
-                    <span className="text-xs text-slate-400 mt-1">请返回工作台点击「一键配置所有」完成本地 Agent 专线接入</span>
-                  </div>
-                ) : (
-                  deviceKeys.map(item => {
-                    const isActive = deviceKeyStatusMap[item.statusKey] ?? true;
-                    return (
+                  <div className="w-[312px] flex flex-col items-start gap-4 box-border">
+                    <h1 className="font-medium text-[24px] leading-[29px] text-black whitespace-nowrap">
+                      云端管理设备 key
+                    </h1>
+                    <div className="w-[312px] flex flex-col items-start gap-3 box-border overflow-y-auto no-scrollbar">
+                      {/* 设备 1: MacBook Pro */}
                       <div
-                        key={item.id}
-                        className="w-full p-4 bg-white/80 hover:bg-white rounded-2xl border border-white shadow-2xs flex items-center justify-between transition-all"
+                        onClick={() => setSelectedDeviceId(1)}
+                        className={`w-[312px] p-4 px-6 rounded-[32px] border transition-all cursor-pointer flex flex-col gap-3 ${
+                          selectedDeviceId === 1 ? 'bg-white border-[#9BC3FF] shadow-xs' : 'bg-white/60 border-white hover:bg-white'
+                        }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-700">
-                            {item.tool.slice(0, 2)}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-slate-900 text-sm">{item.tool}</span>
-                            <span className="font-mono text-xs text-slate-400">{item.key}</span>
-                          </div>
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-semibold text-slate-900 text-sm">MacBook Pro (本机工作站)</span>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                         </div>
-
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => copyToClipboard(item.key, '📋 已复制设备专线 Key')}
-                            className="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer transition-colors"
-                          >
-                            复制
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDeviceKeyStatusMap(prev => ({ ...prev, [item.statusKey]: !isActive }));
-                              showToast(isActive ? `🔒 已切断 ${item.tool} 的专线访问` : `✅ 已重新启用 ${item.tool} 专线访问`);
-                            }}
-                            className={`h-8 px-3.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                              isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                            }`}
-                          >
-                            {isActive ? '生效中' : '已停用'}
-                          </button>
-                        </div>
+                        <span className="text-xs text-slate-400">{localKeys.length} keys · 当前本机</span>
                       </div>
-                    );
-                  })
-                )}
+
+                      {/* 设备 2: iPhone 16 Pro */}
+                      <div
+                        onClick={() => setSelectedDeviceId(2)}
+                        className={`w-[312px] p-4 px-6 rounded-[32px] border transition-all cursor-pointer flex flex-col gap-3 ${
+                          selectedDeviceId === 2 ? 'bg-white border-[#9BC3FF] shadow-xs' : 'bg-white/60 border-white hover:bg-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-semibold text-slate-900 text-sm">iPhone 16 Pro</span>
+                          <span className="w-2 h-2 rounded-full bg-slate-300"></span>
+                        </div>
+                        <span className="text-xs text-slate-400">{iphoneKeys.length} keys · 移动端同步中</span>
+                      </div>
+
+                      {/* 设备 3: Ubuntu Dev Server */}
+                      <div
+                        onClick={() => setSelectedDeviceId(3)}
+                        className={`w-[312px] p-4 px-6 rounded-[32px] border transition-all cursor-pointer flex flex-col gap-3 ${
+                          selectedDeviceId === 3 ? 'bg-white border-[#9BC3FF] shadow-xs' : 'bg-white/60 border-white hover:bg-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-semibold text-slate-900 text-sm">Ubuntu GPU Server</span>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </div>
+                        <span className="text-xs text-slate-400">{ubuntuKeys.length} keys · 云端训练中继节点</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 右侧设备 Key 详情列表 */}
+              <div className="flex-1 h-full p-8 flex flex-col justify-start items-start gap-4 box-border overflow-y-auto no-scrollbar">
+                <div className="flex items-center justify-between w-full pb-3 border-b border-slate-200/60">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">
+                      {selectedDeviceId === 1
+                        ? 'MacBook Pro (本机) 活跃 Key 矩阵'
+                        : (selectedDeviceId === 2 ? 'iPhone 16 Pro 活跃 Key 矩阵' : 'Ubuntu GPU Server 活跃 Key 矩阵')}
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                      {selectedDeviceId === 1
+                        ? '展示本机已接入 Agent 专线凭证，支持一键复制与实时启停控制'
+                        : '在云端针对单项工具一键切换失效或生效，杜绝 Key 泄露风险'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const newId = `key_${Date.now()}`;
+                      const prefix = selectedDeviceId === 1 ? 'mbp' : (selectedDeviceId === 2 ? 'ios' : 'linux');
+                      updateDeviceKeys(prev => [
+                        ...prev,
+                        {
+                          id: newId,
+                          tool: selectedDeviceId === 1 ? '自定义本机专线' : '自定义云端设备专线',
+                          toolId: 'custom',
+                          key: `sk-relay-custom-${prefix}-${Math.random().toString(36).slice(2, 6)}`,
+                          statusKey: newId,
+                          deviceId: selectedDeviceId
+                        }
+                      ]);
+                      showToast('🔑 已成功为当前设备新建专线专用 API Key');
+                    }}
+                    className="h-9 px-4 rounded-full bg-[#0F172A] hover:bg-black text-white text-xs font-medium cursor-pointer transition-all shadow-xs"
+                  >
+                    + 新建设备 Key
+                  </button>
+                </div>
+
+                {/* Key 矩阵卡片 */}
+                <div className="w-full flex flex-col gap-3">
+                  {currentVisibleKeys.length === 0 ? (
+                    <div className="w-full py-12 flex flex-col items-center justify-center text-center bg-white/60 rounded-3xl border border-dashed border-slate-200">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3 text-lg">
+                        🔑
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700">当前设备暂无活跃专线凭证</span>
+                      <span className="text-xs text-slate-400 mt-1">
+                        {selectedDeviceId === 1
+                          ? '请返回工作台点击「一键配置所有」或在侧边抽屉中点击「注入专线加速」'
+                          : '点击上方「+ 新建设备 Key」为该设备分发访问凭证'}
+                      </span>
+                    </div>
+                  ) : (
+                    currentVisibleKeys.map(item => {
+                      const isActive = deviceKeyStatusMap[item.statusKey] ?? true;
+                      return (
+                        <div
+                          key={item.id}
+                          className="w-full p-4 bg-white/80 hover:bg-white rounded-2xl border border-white shadow-2xs flex items-center justify-between transition-all"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-700">
+                              {item.tool.slice(0, 2)}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-slate-900 text-sm">{item.tool}</span>
+                              <span className="font-mono text-xs text-slate-400">{item.key}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => copyToClipboard(item.key, '📋 已复制设备专线 Key')}
+                              className="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer transition-colors"
+                            >
+                              复制
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeviceKeyStatusMap(prev => {
+                                  const nextMap = { ...prev, [item.statusKey]: !isActive };
+                                  try {
+                                    localStorage.setItem(STORAGE_KEY_DEVICE_KEY_STATUS, JSON.stringify(nextMap));
+                                  } catch {}
+                                  return nextMap;
+                                });
+                                showToast(isActive ? `🔒 已切断 ${item.tool} 的专线访问` : `✅ 已重新启用 ${item.tool} 专线访问`);
+                              }}
+                              className={`h-8 px-3.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                                isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                              }`}
+                            >
+                              {isActive ? '生效中' : '已停用'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ========================================================================= */}
         {/* C. 出口安全中心 (OpenAI 纯净标准 / 海外专线加速) */}

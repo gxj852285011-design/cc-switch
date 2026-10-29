@@ -121,13 +121,41 @@ export interface DeviceKeyModel {
   iconType: AgentIconType;
 }
 
-export const INITIAL_DEVICE_KEYS: DeviceKeyModel[] = [];
+export const INITIAL_DEVICE_KEYS: DeviceKeyModel[] = [
+  {
+    id: 1,
+    keyId: 'key_claude_desktop',
+    toolId: 'claude-desktop',
+    title: 'Claude 桌面端',
+    key: 'sk-relay-claude-mbp-88',
+    status: 'active',
+    iconType: 'claude'
+  },
+  {
+    id: 2,
+    keyId: 'key_chatgpt',
+    toolId: 'chatgpt',
+    title: 'Codex / ChatGPT 桌面端',
+    key: 'sk-relay-chatgp-mbp-88',
+    status: 'active',
+    iconType: 'codex'
+  },
+  {
+    id: 3,
+    keyId: 'key_codex',
+    toolId: 'codex',
+    title: 'Codex CLI',
+    key: 'sk-relay-codex-cli-88',
+    status: 'active',
+    iconType: 'codex'
+  }
+];
 
 export const DEVICES = [
-  { id: 1, name: 'MacBook Pro (本机工作站)', tag: '本机', keysCount: 0, status: 'online' },
-  { id: 2, name: 'Mac Studio (办公室)', tag: '远端', keysCount: 0, status: 'online' },
+  { id: 1, name: 'MacBook Pro (本机工作站)', tag: '本机', keysCount: 2, status: 'online' },
+  { id: 2, name: 'Mac Studio (办公室)', tag: '远端', keysCount: 1, status: 'online' },
   { id: 3, name: 'Mac Mini (构建机)', tag: '远端', keysCount: 0, status: 'offline' },
-  { id: 4, name: 'Ubuntu Server (AI 专线节点)', tag: '远端', keysCount: 0, status: 'online' },
+  { id: 4, name: 'Ubuntu Server (AI 专线节点)', tag: '远端', keysCount: 2, status: 'online' },
 ];
 
 export const CATEGORY_TABS: { id: ToolCategory; label: string; count: number }[] = [
