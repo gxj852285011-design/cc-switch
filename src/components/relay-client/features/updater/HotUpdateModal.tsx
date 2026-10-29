@@ -278,19 +278,19 @@ export const HotUpdateModal: React.FC<HotUpdateModalProps> = ({
             <button
               onClick={handleCheckUpdate}
               disabled={isChecking || isDownloading}
-              className="text-xs font-medium text-slate-700 hover:text-slate-800 flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+              className="text-xs font-medium text-slate-700 hover:text-slate-800 flex items-center gap-1.5 cursor-pointer disabled:opacity-40 whitespace-nowrap flex-shrink-0"
             >
               <svg className={`w-3.5 h-3.5 ${isChecking ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <span>{isChecking ? '检查中...' : '重新检查'}</span>
+              <span className="whitespace-nowrap">{isChecking ? '检查中...' : '重新检查'}</span>
             </button>
 
             <div className="flex items-center gap-2">
               {!isDownloading && (
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   关闭
                 </button>
@@ -300,19 +300,19 @@ export const HotUpdateModal: React.FC<HotUpdateModalProps> = ({
                 <button
                   onClick={handleStartUpdateAndRestart}
                   disabled={isDownloading}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap flex-shrink-0"
                 >
                   {isDownloading ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>更新中...</span>
+                      <span className="whitespace-nowrap">更新中...</span>
                     </>
                   ) : (
                     <>
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                       </svg>
-                      <span>立即热更新并重启</span>
+                      <span className="whitespace-nowrap">立即热更新并重启</span>
                     </>
                   )}
                 </button>

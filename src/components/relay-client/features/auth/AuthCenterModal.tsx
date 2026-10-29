@@ -90,7 +90,7 @@ export const AuthCenterModal: React.FC<AuthCenterModalProps> = ({
           {isLoggedIn ? (
             <button
               onClick={onLogout}
-              className="text-xs text-rose-500 hover:text-rose-700 transition-colors cursor-pointer"
+              className="text-xs text-rose-500 hover:text-rose-700 transition-colors cursor-pointer whitespace-nowrap flex-shrink-0"
             >
               解除当前绑定
             </button>
@@ -109,7 +109,7 @@ export const AuthCenterModal: React.FC<AuthCenterModalProps> = ({
                   onShowToast('请手动在输入框粘贴令牌');
                 }
               }}
-              className="text-xs text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+              className="text-xs text-slate-500 hover:text-slate-800 transition-colors cursor-pointer whitespace-nowrap flex-shrink-0"
             >
               一键粘贴令牌
             </button>
@@ -118,7 +118,7 @@ export const AuthCenterModal: React.FC<AuthCenterModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap flex-shrink-0"
             >
               关闭
             </button>
@@ -127,11 +127,11 @@ export const AuthCenterModal: React.FC<AuthCenterModalProps> = ({
                 onClick={() => {
                   if (!tokenInput.trim()) {
                     onShowToast('⚠️ 请先输入有效的系统访问令牌！');
-                    return;
+                  } else {
+                    onSaveToken(tokenInput.trim());
                   }
-                  onSaveToken(tokenInput.trim());
                 }}
-                className="px-4 py-2 rounded-xl bg-[#1E293B] hover:bg-[#0F172A] text-white text-xs font-medium transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#1E293B] hover:bg-[#0F172A] text-white text-xs font-medium transition-colors cursor-pointer whitespace-nowrap flex-shrink-0"
               >
                 验证并绑定
               </button>

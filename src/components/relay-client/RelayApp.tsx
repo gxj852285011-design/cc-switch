@@ -1109,32 +1109,32 @@ export const RelayApp: React.FC = () => {
                     </div>
 
                     {/* Agent 标题与通俗描述 */}
-                    <div className="w-full flex flex-col items-start gap-1 box-border">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-[17px] text-[#262626] capitalize">
-                          {activeAgent.title}
-                        </h3>
-                        <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-normal ${
+                    <div className="w-full flex flex-col items-start gap-2 box-border">
+                      <h3 className="font-bold text-[18px] text-[#262626] capitalize whitespace-nowrap">
+                        {activeAgent.title}
+                      </h3>
+                      <div className="w-full flex flex-wrap items-center gap-2">
+                        <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap flex-shrink-0 ${
                           activeAgent.badge === '已安装'
                             ? 'bg-black/5 text-[#262626]'
                             : 'bg-slate-100 text-[#A3A3A3]'
                         }`}>
-                          {activeAgent.isDesktopApp ? `桌面客户端 · ${activeAgent.badge}` : activeAgent.badge}
+                          {activeAgent.isDesktopApp ? `桌面端 · ${activeAgent.badge}` : activeAgent.badge}
                         </span>
                         {activeAgent.badge === '已安装' && (
                           activeAgent.isConfigured ? (
-                            <span className="text-[11px] px-2.5 py-0.5 rounded-full font-normal bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
+                            <span className="text-[11px] px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap flex-shrink-0 bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
                               <span>专线已配置</span>
                             </span>
                           ) : (
-                            <span className="text-[11px] px-2.5 py-0.5 rounded-full font-normal bg-amber-50 text-amber-700 border border-amber-200/60">
+                            <span className="text-[11px] px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap flex-shrink-0 bg-amber-50 text-amber-700 border border-amber-200/60">
                               专线待配置
                             </span>
                           )
                         )}
                       </div>
-                      <p className="font-normal text-[12px] leading-[17px] text-slate-500">
+                      <p className="font-normal text-[12px] leading-[17px] text-slate-500 mt-0.5">
                         {activeAgent.desc}
                       </p>
                     </div>
@@ -1188,14 +1188,14 @@ export const RelayApp: React.FC = () => {
                                 <div className="flex items-center gap-2">
                                   <button
                                     onClick={() => handleStartAutoInstall(activeAgent.id)}
-                                    className="flex-1 h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs"
+                                    className="flex-1 h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs whitespace-nowrap"
                                   >
                                     ⚡ 一键安装客户端 (DMG)
                                   </button>
                                   {activeAgent.officialWebUrl && (
                                     <button
                                       onClick={() => handleOpenExternal(activeAgent.officialWebUrl)}
-                                      className="h-[36px] px-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-black text-[12px] font-medium rounded-full flex items-center justify-center gap-1 transition-all cursor-pointer"
+                                      className="h-[36px] px-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-black text-[12px] font-medium rounded-full flex items-center justify-center gap-1 transition-all cursor-pointer whitespace-nowrap"
                                       title="前往官网下载页面"
                                     >
                                       🌐 官网下载
@@ -1208,7 +1208,7 @@ export const RelayApp: React.FC = () => {
                             <div className="flex flex-col gap-2 pt-1">
                               <button
                                 onClick={() => handleOpenDesktopApp(activeAgent)}
-                                className="w-full h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-semibold rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs"
+                                className="w-full h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-semibold rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs whitespace-nowrap"
                               >
                                 <span>🚀 唤醒 / 打开桌面客户端</span>
                               </button>
@@ -1218,14 +1218,14 @@ export const RelayApp: React.FC = () => {
 
                         {/* 2. 专属海外加速专线配置 */}
                         <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-semibold text-slate-800">海外加速专线与零信任通道</span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-semibold text-slate-800 whitespace-nowrap flex-shrink-0">海外加速专线通道</span>
+                            <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap flex-shrink-0 ${
                               activeAgent.isConfigured
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : 'bg-slate-100 text-slate-600'
                             }`}>
-                              {activeAgent.isConfigured ? 'WireGuard 直连 (18ms) · 专线已生效' : 'WireGuard 直连 (18ms) · 待注入'}
+                              {activeAgent.isConfigured ? 'WireGuard 直连 (18ms) · 已生效' : 'WireGuard 直连 (18ms) · 待注入'}
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-500 leading-[16px] m-0">
@@ -1253,18 +1253,18 @@ export const RelayApp: React.FC = () => {
                           <div className="flex items-center gap-2 pt-1">
                             <button
                               onClick={() => handleConfigureRelay(activeAgent.id)}
-                              className={`flex-1 h-[34px] rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer text-[12px] font-semibold select-none active:scale-[0.99] ${
+                              className={`flex-1 h-[34px] rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer text-[12px] font-semibold select-none active:scale-[0.99] whitespace-nowrap ${
                                 activeAgent.isConfigured
                                   ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
                                   : 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
                               }`}
                             >
-                              <span>{activeAgent.isConfigured ? '✅ 专线加速已注入 (生效中)' : '⚡ 注入专线加速'}</span>
+                              <span className="whitespace-nowrap">{activeAgent.isConfigured ? '✅ 专线加速已注入 (生效中)' : '⚡ 注入专线加速'}</span>
                             </button>
                             {activeAgent.officialWebUrl && (
                               <button
                                 onClick={() => handleOpenExternal(activeAgent.officialWebUrl)}
-                                className="h-[34px] px-3.5 bg-white hover:bg-slate-50 text-slate-600 border border-[#E2E8F0] text-[12px] font-medium rounded-full flex items-center justify-center gap-1 transition-all cursor-pointer"
+                                className="h-[34px] px-3.5 bg-white hover:bg-slate-50 text-slate-600 border border-[#E2E8F0] text-[12px] font-medium rounded-full flex items-center justify-center gap-1 transition-all cursor-pointer whitespace-nowrap flex-shrink-0"
                               >
                                 🌐 官网主页
                               </button>
@@ -1301,13 +1301,13 @@ export const RelayApp: React.FC = () => {
                                       setViewMode('security');
                                       setIsDrawerOpen(false);
                                     }}
-                                    className="flex-1 h-[31px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer"
+                                    className="flex-1 h-[31px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer whitespace-nowrap"
                                   >
                                     查看出口详情
                                   </button>
                                   <button
                                     onClick={() => copyToClipboard('NetBird WireGuard Zero-Trust Egress Report', '📋 已复制只读体检报告')}
-                                    className="flex-1 h-[31px] bg-white hover:bg-slate-50 border border-[#E2E8F0] text-[#0F172A] text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer"
+                                    className="flex-1 h-[31px] bg-white hover:bg-slate-50 border border-[#E2E8F0] text-[#0F172A] text-[12px] font-medium rounded-full flex items-center justify-center transition-all cursor-pointer whitespace-nowrap"
                                   >
                                     复制检测报告
                                   </button>
@@ -1378,14 +1378,14 @@ export const RelayApp: React.FC = () => {
                                 <div className="flex items-center gap-2">
                                   <button
                                     onClick={() => handleStartAutoInstall(activeAgent.id)}
-                                    className="flex-1 h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs"
+                                    className="flex-1 h-[36px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99] shadow-xs whitespace-nowrap"
                                   >
                                     ⚡ 一键自动安装
                                   </button>
                                   {activeAgent.installCmd && (
                                     <button
                                       onClick={() => handleLaunchTerminalInstall(activeAgent.installCmd)}
-                                      className="h-[36px] px-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-black text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99]"
+                                      className="h-[36px] px-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-black text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-[0.99] whitespace-nowrap flex-shrink-0"
                                       title="在系统终端窗口中打开并实时查看安装日志"
                                     >
                                       💻 终端安装
@@ -1399,9 +1399,9 @@ export const RelayApp: React.FC = () => {
                           <div className="w-full flex flex-col gap-3">
                             {/* 专线状态卡片 */}
                             <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2.5 box-border">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-semibold text-slate-800">安全传输通道</span>
-                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-[11px] font-semibold text-slate-800 whitespace-nowrap flex-shrink-0">安全传输通道</span>
+                                <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap flex-shrink-0 ${
                                   activeAgent.isConfigured
                                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                     : 'bg-black/5 text-[#262626]'
@@ -1411,24 +1411,24 @@ export const RelayApp: React.FC = () => {
                               </div>
                               <div className="flex flex-col gap-1.5 text-[11px] text-slate-600">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-slate-400">专线模式:</span>
-                                  <span className="font-medium text-slate-700 flex items-center gap-1">
+                                  <span className="text-slate-400 whitespace-nowrap">专线模式:</span>
+                                  <span className="font-medium text-slate-700 flex items-center gap-1 whitespace-nowrap">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     WireGuard 直连 (18ms)
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-slate-400">本机设备 Key:</span>
+                                  <span className="text-slate-400 whitespace-nowrap">本机设备 Key:</span>
                                   <div className="flex items-center gap-1.5">
-                                    <span className={`text-[10px] font-medium ${isKeyActive ? 'text-emerald-700' : 'text-slate-400'}`}>
+                                    <span className={`text-[10px] font-medium whitespace-nowrap ${isKeyActive ? 'text-emerald-700' : 'text-slate-400'}`}>
                                       {isKeyActive ? '生效中' : (activeAgent.isConfigured ? '已停用' : '待配置')}
                                     </span>
-                                    <span className="font-mono text-slate-600 text-[10px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                    <span className="font-mono text-slate-600 text-[10px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap">
                                       {displayKey}
                                     </span>
                                     <button
                                       onClick={() => copyToClipboard(displayKey, '📋 已复制专线凭证 Key')}
-                                      className="text-[10px] text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+                                      className="text-[10px] text-blue-600 hover:text-blue-800 font-medium cursor-pointer whitespace-nowrap"
                                     >
                                       复制
                                     </button>
@@ -1437,37 +1437,37 @@ export const RelayApp: React.FC = () => {
                               </div>
                               <button
                                 onClick={() => handleConfigureRelay(activeAgent.id)}
-                                className={`w-full h-[34px] rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1 text-[12px] font-semibold select-none active:scale-[0.99] ${
+                                className={`w-full h-[34px] rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1 text-[12px] font-semibold select-none active:scale-[0.99] whitespace-nowrap ${
                                   activeAgent.isConfigured
                                     ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
                                     : 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
                                 }`}
                               >
-                                {activeAgent.isConfigured ? '✅ 专线配置已生效 (点击重新同步)' : '⚡ 立即配置专线'}
+                                <span>{activeAgent.isConfigured ? '✅ 专线配置已生效 (重新同步)' : '⚡ 立即配置专线'}</span>
                               </button>
                             </div>
 
                             {/* 使用方法 */}
                             <div className="w-full bg-white/80 border border-white rounded-[20px] p-4 flex flex-col gap-2 box-border">
                               <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-semibold text-blue-900">使用方法</span>
-                                <span className="text-[10px] text-blue-600">终端直接运行</span>
+                                <span className="text-[11px] font-semibold text-blue-900 whitespace-nowrap">使用方法</span>
+                                <span className="text-[10px] text-blue-600 whitespace-nowrap">终端直接运行</span>
                               </div>
                               <p className="text-[11px] text-blue-700 leading-[16px]">
                                 打开系统终端、iTerm 或 VS Code 终端，输入下方命令回车即可：
                               </p>
                               <div className="flex items-center justify-between bg-white border border-[#E2E8F0] rounded-full px-4 py-2 mt-0.5">
-                                <code className="font-mono text-[12px] font-bold text-slate-800">{activeAgent.quickCmd}</code>
+                                <code className="font-mono text-[12px] font-bold text-slate-800 truncate mr-2 select-all">{activeAgent.quickCmd}</code>
                                 <button
                                   onClick={() => copyToClipboard(activeAgent.quickCmd, `📋 已复制启动命令: ${activeAgent.quickCmd}`)}
-                                  className="text-[12px] text-[#0F172A] font-medium cursor-pointer"
+                                  className="text-[12px] text-[#0F172A] font-medium cursor-pointer whitespace-nowrap flex-shrink-0"
                                 >
                                   复制命令
                                 </button>
                               </div>
                               <button
                                 onClick={() => handleLaunchSessionTerminal(activeAgent.quickCmd)}
-                                className="w-full h-[34px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1"
+                                className="w-full h-[34px] bg-[#0F172A] hover:bg-black text-white text-[12px] font-medium rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1 whitespace-nowrap"
                               >
                                 💻 在终端窗口启动
                               </button>
@@ -1640,7 +1640,7 @@ export const RelayApp: React.FC = () => {
                       ]);
                       showToast('🔑 已成功为当前设备新建专线专用 API Key');
                     }}
-                    className="h-9 px-4 rounded-full bg-[#0F172A] hover:bg-black text-white text-xs font-medium cursor-pointer transition-all shadow-xs"
+                    className="h-9 px-4 rounded-full bg-[#0F172A] hover:bg-black text-white text-xs font-medium cursor-pointer transition-all shadow-xs whitespace-nowrap flex-shrink-0"
                   >
                     + 新建设备 Key
                   </button>
@@ -1681,7 +1681,7 @@ export const RelayApp: React.FC = () => {
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => copyToClipboard(item.key, '📋 已复制设备专线 Key')}
-                              className="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer transition-colors"
+                              className="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer transition-colors whitespace-nowrap flex-shrink-0"
                             >
                               复制
                             </button>
@@ -1696,7 +1696,7 @@ export const RelayApp: React.FC = () => {
                                 });
                                 showToast(isActive ? `🔒 已切断 ${item.tool} 的专线访问` : `✅ 已重新启用 ${item.tool} 专线访问`);
                               }}
-                              className={`h-8 px-3.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                              className={`h-8 px-3.5 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap flex-shrink-0 ${
                                 isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
                               }`}
                             >
@@ -1845,13 +1845,13 @@ export const RelayApp: React.FC = () => {
 
                 {isIpv6Blocked ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
+                    <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1 whitespace-nowrap flex-shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                       已屏蔽泄露
                     </span>
                     <button
                       onClick={handleToggleIpv6Block}
-                      className="h-8 px-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 text-xs font-normal cursor-pointer transition-all"
+                      className="h-8 px-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 text-xs font-normal cursor-pointer transition-all whitespace-nowrap flex-shrink-0"
                       title="解除屏蔽规则"
                     >
                       解除
@@ -1860,7 +1860,7 @@ export const RelayApp: React.FC = () => {
                 ) : (
                   <button
                     onClick={handleToggleIpv6Block}
-                    className="h-8 px-3.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-medium cursor-pointer transition-all active:scale-95 shadow-xs"
+                    className="h-8 px-3.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-medium cursor-pointer transition-all active:scale-95 shadow-xs whitespace-nowrap flex-shrink-0"
                   >
                     一键屏蔽
                   </button>
@@ -1941,7 +1941,7 @@ export const RelayApp: React.FC = () => {
               </div>
               <button
                 onClick={handleSwitchExitNode}
-                className="h-8 px-4 rounded-xl bg-[#1E293B] hover:bg-[#0F172A] text-white text-xs font-medium cursor-pointer transition-all active:scale-95 shadow-2xs"
+                className="h-8 px-4 rounded-xl bg-[#1E293B] hover:bg-[#0F172A] text-white text-xs font-medium cursor-pointer transition-all active:scale-95 shadow-2xs whitespace-nowrap flex-shrink-0"
               >
                 🔀 漂移切换出口
               </button>
