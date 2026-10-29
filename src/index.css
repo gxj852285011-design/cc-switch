@@ -610,7 +610,7 @@ input[type="password"]::-ms-clear {
   width: 360px !important;
   max-width: 360px !important;
   min-width: 360px !important;
-  padding: 24px 24px 64px 24px !important;
+  padding: 24px 24px 32px 32px !important;
   margin: 0 !important;
   opacity: 1 !important;
   overflow: hidden !important;
@@ -649,12 +649,12 @@ input[type="password"]::-ms-clear {
   transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1), transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 保证卡片列与卡片本体绝对不被挤压压缩 */
+/* 保证卡片列与卡片本体绝对不被挤压压缩，对齐设计稿 260px 宽度 */
 #expanded-col-1, #expanded-col-2, .agent-card {
   flex-shrink: 0 !important;
-  width: 243px !important;
-  min-width: 243px !important;
-  max-width: 243px !important;
+  width: 260px !important;
+  min-width: 260px !important;
+  max-width: 260px !important;
 }
 
 /* 隐藏滚动条 */

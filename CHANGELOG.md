@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Detailed Chinese iteration records and QA checklists are maintained in [docs/ITERATION_LOG.md](docs/ITERATION_LOG.md).
 
+## [4.2.2] - 2026-10-29
+
+### Added & Improved
+- **Card Height Adaptive Auto-Fill**: Overhauled Agent access card columns (`#expanded-col-1`, `#expanded-col-2`) from rigid heights (`max-h-[503px]`, `h-[157px]`) to adaptive vertical flexbox distribution (`flex-1 min-h-[135px]`, `h-full flex flex-col justify-between`). Cards expand dynamically to divide and fill container height evenly, completely eliminating bottom dead space.
+- **Modern Large Corner Radius & Baseline Alignment**: Upgraded cards to `rounded-[32px]` matching Figma design tokens. Symmetrically aligned stage and hero vertical padding (`pt-[24px] pb-[32px]`), locking Row 3 card buttons and Left Hero buttons ("+ 一键配置所有" / "环境检测") to the exact same horizontal baseline.
+- **Geometric Symmetry & Anti-Jitter Drawer Transitions**: Increased card and column widths to 260px (`px-[28px]` stage padding). Mathematically equalized the total width occupied during both folded and expanded states (Hero 360 + Col1 260 + Col2 260 = 912px; Col1 260 + Drawer 360 + Col2 260 = 912px), completely eliminating horizontal twitching and compression during drawer animations.
+
 ## [4.2.1] - 2026-10-29
 
 ### Added
