@@ -11,11 +11,11 @@
 
 import type { DeviceKeyItem, DeviceKeyStatus, ToolId, AgentIconType } from './types';
 
-// 云端网关与控制台接口常量 (已绑定专属 ECS 同步中继实例: 123.56.181.193)
-export const DEFAULT_OCTOPUS_ORIGIN = 'http://123.56.181.193:3000';
-export const DEFAULT_OCTOPUS_GATEWAY = 'http://123.56.181.193:3000/v1';
-export const DEFAULT_OCTOPUS_CREATE_KEY_API = 'http://123.56.181.193:3000/api/token/';
-export const DEFAULT_OCTOPUS_STATUS_API_PREFIX = 'http://123.56.181.193:3000/app/token';
+// 云端网关与控制台接口常量 (默认使用标准云端 API 域名)
+export const DEFAULT_OCTOPUS_ORIGIN = 'https://octopusx.ai';
+export const DEFAULT_OCTOPUS_GATEWAY = 'https://octopusx.ai/v1';
+export const DEFAULT_OCTOPUS_CREATE_KEY_API = 'https://octopusx.ai/api/token/';
+export const DEFAULT_OCTOPUS_STATUS_API_PREFIX = 'https://octopusx.ai/app/token';
 
 // 安全基线规范：消除全局明文硬编码 Master Token，支持由 OS 钥匙串或内存状态注入
 export const DEFAULT_LOOPBACK_GATEWAY = 'http://127.0.0.1:28848';
@@ -23,8 +23,8 @@ export const GLOBAL_SYSTEM_ACCESS_TOKEN = '';
 
 export class RelayCloudService {
   private static instance: RelayCloudService;
-  private currentDeviceId: string = 'dev_mac_883361b1';
-  private currentDeviceName: string = 'MacBook Pro (高相健)';
+  private currentDeviceId: string = 'dev_station_local';
+  private currentDeviceName: string = 'MacBook Pro (本机工作站)';
   private systemAccessToken: string = '';
   private isTauriEnv: boolean = false;
 

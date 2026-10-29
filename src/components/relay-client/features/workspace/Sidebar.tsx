@@ -75,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         title="中转站认证中心"
       >
         <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-xs group-hover:scale-105 transition-transform">
-          GX
+          {isLoggedIn ? '8x' : 'AI'}
         </div>
         <span className="text-[10px] text-slate-400 group-hover:text-slate-600 font-medium truncate max-w-[60px]">
           {isLoggedIn ? '已授权' : '未登录'}

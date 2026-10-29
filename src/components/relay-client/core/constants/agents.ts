@@ -121,20 +121,13 @@ export interface DeviceKeyModel {
   iconType: AgentIconType;
 }
 
-export const INITIAL_DEVICE_KEYS: DeviceKeyModel[] = [
-  { id: 1, keyId: 'key_cld_desk', toolId: 'claude-desktop', title: 'Claude 桌面端', key: 'sk-relay-cld...8f1a', status: 'active', iconType: 'claude' },
-  { id: 2, keyId: 'key_cld_cli', toolId: 'claude', title: 'Claude Code (CLI)', key: 'sk-relay-cld...990e', status: 'active', iconType: 'claude' },
-  { id: 3, keyId: 'key_gpt_desk', toolId: 'chatgpt', title: 'Codex / ChatGPT 桌面端', key: 'sk-relay-gpt...4e2f', status: 'active', iconType: 'openai' },
-  { id: 4, keyId: 'key_cdx_cli', toolId: 'codex', title: 'Codex CLI', key: 'sk-relay-cdx...3a1c', status: 'active', iconType: 'openai' },
-  { id: 5, keyId: 'key_hermes', toolId: 'hermes', title: 'Hermes 客户端', key: 'sk-relay-her...7b90', status: 'active', iconType: 'hermes' },
-  { id: 6, keyId: 'key_claw', toolId: 'openclaw', title: 'OpenClaw 客户端', key: 'sk-relay-ocw...11d2', status: 'active', iconType: 'claw' },
-];
+export const INITIAL_DEVICE_KEYS: DeviceKeyModel[] = [];
 
 export const DEVICES = [
-  { id: 1, name: 'MacBook Pro (高相健)', tag: '本机', keysCount: 4, status: 'online' },
-  { id: 2, name: 'Mac Studio (办公室)', tag: '远端', keysCount: 3, status: 'online' },
-  { id: 3, name: 'Mac Mini (构建机)', tag: '远端', keysCount: 2, status: 'offline' },
-  { id: 4, name: 'Ubuntu Server (AI 专线节点)', tag: '远端', keysCount: 4, status: 'online' },
+  { id: 1, name: 'MacBook Pro (本机工作站)', tag: '本机', keysCount: 0, status: 'online' },
+  { id: 2, name: 'Mac Studio (办公室)', tag: '远端', keysCount: 0, status: 'online' },
+  { id: 3, name: 'Mac Mini (构建机)', tag: '远端', keysCount: 0, status: 'offline' },
+  { id: 4, name: 'Ubuntu Server (AI 专线节点)', tag: '远端', keysCount: 0, status: 'online' },
 ];
 
 export const CATEGORY_TABS: { id: ToolCategory; label: string; count: number }[] = [
