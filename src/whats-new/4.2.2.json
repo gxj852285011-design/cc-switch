@@ -1,0 +1,26 @@
+{
+  "version": "4.2.2",
+  "items": [
+    {
+      "type": "fix",
+      "zh": "全面消除按钮与状态徽标文字折行问题",
+      "zh-TW": "全面消除按鈕與狀態徽標文字折行問題",
+      "en": "Eliminated text wrapping on buttons and badges across all views",
+      "ja": "ボタンとバッジのテキスト折り返し問題を全面的に解消"
+    },
+    {
+      "type": "improve",
+      "zh": "工作台卡片高度自适应填充与对齐优化",
+      "zh-TW": "工作台卡片高度自適應填充與對齊優化",
+      "en": "Adaptive card height distribution and bottom baseline alignment",
+      "ja": "ワークベンチカード高さの自動適応とベースライン揃えを改善"
+    },
+    {
+      "type": "improve",
+      "zh": "全栈锁定 1047px 最小宽度并支持平滑拉伸",
+      "zh-TW": "全棧鎖定 1047px 最小寬度並支援平滑拉伸",
+      "en": "Enforced 1047px minimum window width with fluid responsive scaling",
+      "ja": "最小幅1047pxを全スタックで制限しスムーズな拡縮に対応"
+    }
+  ]
+}

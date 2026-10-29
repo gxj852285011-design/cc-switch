@@ -1,7 +1,7 @@
 {
-  "version": "4.2.1",
-  "name": "AI Agent Hub v4.2.1",
-  "pub_date": "2026-10-29T08:00:00Z",
-  "notes": "• 切换海外 6 大核心 Agent 矩阵（Claude Desktop/CLI、Codex Desktop/CLI、Hermes、OpenClaw）\n• 接入与设备管理 Key 矩阵双向强同步\n• 内置 OTA 原生热更新引擎与 Gatekeeper 隔离修复\n• 全仓敏感隐私深度脱敏与首屏全白屏防御\n• 统一热更新推送机制与消除误导性多入口",
-  "download_url": "https://github.com/gxj852285011-design/cc-switch/releases/download/v4.2.0/AI_Agent_Hub_4.2.0_aarch64.dmg"
+  "version": "4.2.2",
+  "name": "AI Agent Hub v4.2.2",
+  "pub_date": "2026-10-29T10:45:00Z",
+  "notes": "• 全面消除全局按钮与抽屉状态徽标文字折行问题\n• 抽屉头部标题与 Badge 结构分层解耦与专线卡片文案精简\n• 主工作台卡片高度自适应垂直填充，彻底根除底部留白死角\n• 全栈锁定 1047px 最小窗口宽度并支持宽屏弹性拓展\n• 严格通过 Multi-Pass Review (MPR v2.3.0) 形式化质量收敛与真机核验",
+  "download_url": "https://github.com/gxj852285011-design/cc-switch/releases/download/v4.2.2/AI_Agent_Hub_4.2.2_aarch64.dmg"
 }
