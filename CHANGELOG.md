@@ -1,9 +1,31 @@
 # Changelog
 
-All notable changes to CC Switch will be documented in this file.
+All notable changes to AI Agent Hub (formerly CC Switch) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Detailed Chinese iteration records and QA checklists are maintained in [docs/ITERATION_LOG.md](docs/ITERATION_LOG.md).
+
+## [4.2.1] - 2026-10-29
+
+### Added
+- **Customer 6-Agent Matrix**: Fully aligned product positioning with frontier overseas AI developers by adopting Anthropic's `Claude Desktop` & `Claude Code CLI`, OpenAI's `Codex / ChatGPT Desktop` & `Codex CLI`, Nous Research's `Hermes`, and `OpenClaw`. Removed all domestic consumer chat apps (Doubao, Kimi, Yuanbao, Tongyi, Zhipu).
+- **Dual-Direction Access & Device Management Key Synchronization**: Configuring any agent automatically issues and maps a dedicated key in the "MacBook Pro (本机工作站)" matrix in Device Management. Supports copy, reload, revoke, and persistent status toggling (`relay_device_keys_v4`).
+- **In-App Native OTA Hot Update Engine**: Integrated `UpdateProvider` with quiet startup probes, checking for new GitHub releases and allowing 1-click in-app updates without re-downloading DMGs.
+- **macOS Gatekeeper Quarantine Auto-Fix**: Packaged `双击一键修复打不开(已损坏解决).command` in the DMG bundle to bypass Chrome quarantine attributes (`xattr -cr`) with 1-click.
+- **Top-Level Crash & White Screen Defense**: Added defensive versioning and JSON parsing fallbacks for all local storage keys, paired with `FrontendErrorBoundary` diagnostics to eliminate blank white screens.
+
+### Fixed & Sanitized
+- **Complete Developer Identity & Secret Sanitization**: Scrubbed all personal names (高相健 / GX), private session tokens, and internal subnet IPs across code, UI, diffs, and mock stores. Rebranded account panel to neutral enterprise `未登录用户` (AI / 8x line indicator).
+- **Codex Key Visibility**: Resolved the state disconnect where Codex showed configured in Access but lacked a corresponding entry in Device Management.
+
+## [4.2.0] - 2026-10-28
+
+### Added
+- **AI Agent Hub Standalone Branding**: Decoupled from legacy CC Switch menus to present a dedicated, fluid AI Agent Hub desktop application (`RelayApp`).
+- **WireGuard Zero-Trust Egress Anti-Ban Architecture**: Integrated NetBird WireGuard backbone line (`100.64.0.12`) with pure residential exit nodes (US/SG/JP), real-time latency probes, and IPv6 bypass leakage blocking.
+- **Official Download Landing Page**: Published modern landing page (`docs/index.html`) optimized for GitHub Pages and Cloudflare Pages deployment.
 
 ## [4.1.0] - 2026-10-27
 
