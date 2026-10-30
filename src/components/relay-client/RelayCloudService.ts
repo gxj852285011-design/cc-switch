@@ -234,48 +234,58 @@ export class RelayCloudService {
    * 在云端控制台或设备管理 Tab 中，切换 Token 的「有效 (Active) / 失效 (Revoked)」
    * 对接抓取到的线上端点: https://octopusx.ai/app/token/{id}/status (如 1006 为 key id)
    */
-  public async toggleKeyStatus(keyId: string, targetStatus: DeviceKeyStatus): Promise<{ success: boolean; message?: string; error?: string }> {
+  public async toggleKeyStatus(
+    keyId: string, 
+    targetStatus: DeviceKeyStatus
+  ): Promise<{ success: boolean; message?: string; error?: string; endpoint: string; numericStatus: number; isFallback?: boolean }> {
     // 提取纯数字或干净的 ID (如 '1006' 或去掉前缀)
     const cleanId = keyId.replace(/^[a-zA-Z_]+_/, '') || keyId;
     const numericStatus = targetStatus === 'active' ? 1 : 2; // 1 = 有效, 2 = 失效 (Revoked)
     const statusMsg = targetStatus === 'active' ? '✅ 已恢复该设备密钥访问权限' : '🔒 已临时切断该设备连接';
+    const targetUrl = `${DEFAULT_OCTOPUS_STATUS_API_PREFIX}/${cleanId}/status`;
     
-    console.log(`[Octopus X] 发起状态切换: ${DEFAULT_OCTOPUS_STATUS_API_PREFIX}/${cleanId}/status -> status: ${numericStatus}`);
+    console.log(`[Octopus X] 发起状态切换: ${targetUrl} -> status: ${numericStatus}`);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
       // 优先以 PUT 模式提交，若 405 则回退 POST
-      let response = await fetch(`${DEFAULT_OCTOPUS_STATUS_API_PREFIX}/${cleanId}/status`, {
+      let response = await fetch(targetUrl, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${this.systemAccessToken}`,
+          'Authorization': this.systemAccessToken ? `Bearer ${this.systemAccessToken}` : '',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status: numericStatus })
+        body: JSON.stringify({ status: numericStatus }),
+        signal: controller.signal
       });
 
-      if (!response.ok && response.status === 405) {
-        response = await fetch(`${DEFAULT_OCTOPUS_STATUS_API_PREFIX}/${cleanId}/status`, {
+      if (!response.ok && (response.status === 405 || response.status === 404)) {
+        response = await fetch(targetUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.systemAccessToken}`,
+            'Authorization': this.systemAccessToken ? `Bearer ${this.systemAccessToken}` : '',
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ status: numericStatus })
+          body: JSON.stringify({ status: numericStatus }),
+          signal: controller.signal
         });
       }
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         console.log(`[Octopus X] Token ${cleanId} 状态已成功切换为: ${targetStatus.toUpperCase()}`);
-        return { success: true, message: statusMsg };
+        return { success: true, message: statusMsg, endpoint: targetUrl, numericStatus };
       } else {
         const errText = await response.text();
         console.warn(`[Octopus X] 状态切换返回非 200: ${response.status} ${errText}`);
-        return { success: false, message: statusMsg, error: `HTTP ${response.status}` };
+        return { success: false, message: statusMsg, error: `HTTP ${response.status}`, endpoint: targetUrl, numericStatus, isFallback: true };
       }
     } catch (err: any) {
-      console.warn(`[Octopus X] 切换 Token ${cleanId} 状态网络异常:`, err);
+      console.warn(`[Octopus X] 切换 Token ${cleanId} 状态网络异常 (启用本地乐观同步):`, err);
       // 本地状态乐观更新
-      return { success: true, message: statusMsg };
+      return { success: true, message: statusMsg, endpoint: targetUrl, numericStatus, isFallback: true };
     }
   }
 

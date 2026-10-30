@@ -1,0 +1,26 @@
+{
+  "version": "4.2.4",
+  "items": [
+    {
+      "type": "new",
+      "zh": "云端设备管理支持单键使远程 API Key 失效",
+      "zh-TW": "雲端設備管理支援單鍵使遠端 API Key 失效",
+      "en": "Revoke or activate remote device API keys via cloud endpoint",
+      "ja": "クラウドから遠隔端末のAPIキーを即時無効化/再有効化"
+    },
+    {
+      "type": "new",
+      "zh": "新增一键云端失效功能，紧急切断设备专线",
+      "zh-TW": "新增一鍵雲端失效功能，緊急切斷設備專線",
+      "en": "Emergency one-click cloud revocation for all keys of a device",
+      "ja": "端末の全キーをクラウド側で一括遮断する緊急無効化機能"
+    },
+    {
+      "type": "improve",
+      "zh": "设备 Key 卡片展示云端 Token ID 与同步状态",
+      "zh-TW": "設備 Key 卡片展示雲端 Token ID 與同步狀態",
+      "en": "Display cloud Token ID, endpoint, and real-time sync indicators",
+      "ja": "クラウドToken IDとリアルタイム同期バッジを可視化"
+    }
+  ]
+}

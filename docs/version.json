@@ -1,7 +1,7 @@
 {
-  "version": "4.2.3",
-  "name": "AI Agent Hub v4.2.3",
-  "pub_date": "2026-10-30T03:15:00Z",
-  "notes": "• 详情卡片（抽屉）移至卡片矩阵最右侧弹出，彻底消除两列卡片被生硬拆散的问题\n• 新增选中卡片实时高亮与聚焦环反馈，强化人机交互认知\n• 全栈保持 1047px 最小视口锁定与自适应弹性垂直填充\n• 严格执行全栈发版六步闭环，提供验证无误的正式 Release DMG 资产",
-  "download_url": "https://github.com/gxj852285011-design/cc-switch/releases/download/v4.2.3/AI_Agent_Hub_4.2.3_aarch64.dmg"
+  "version": "4.2.4",
+  "name": "AI Agent Hub v4.2.4",
+  "pub_date": "2026-10-30T03:45:00Z",
+  "notes": "• 云端设备管理联动线上真实端点 (/app/token/{id}/status)，支持单键令远程设备 API Key 失效或恢复生效\n• 新增「一键云端失效」紧急安全阻断能力，全量切断远端设备所有专线访问\n• 设备 Key 卡片展示云端 Token ID、端点路径与活跃状态徽标，反馈更清晰\n• 严格执行全栈发版六步闭环，提供验证无误的正式 Release DMG 资产",
+  "download_url": "https://github.com/gxj852285011-design/cc-switch/releases/download/v4.2.4/AI_Agent_Hub_4.2.4_aarch64.dmg"
 }

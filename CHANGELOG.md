@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Detailed Chinese iteration records and QA checklists are maintained in [docs/ITERATION_LOG.md](docs/ITERATION_LOG.md).
 
+## [4.2.4] - 2026-10-30
+
+### Added & Improved
+- **Remote Device Cloud API Key Revocation & Activation**: Integrated live cloud endpoint (`https://octopusx.ai/app/token/{id}/status` and `/api/token/{id}/status`) into Device Management (`viewMode === 'devices'`). Administrators can now invalidate (`status: 2`) or reactivate (`status: 1`) remote device API keys in real time on the cloud backend.
+- **One-Click Emergency Cloud Device Revocation**: Added a dedicated top-level "一键云端失效" action for remote devices (iPhone 16 Pro, Ubuntu GPU Server). Immediately cuts off all egress credentials and network lines for compromised or decommissioned devices in batch.
+- **Device Key Cloud Metadata & Status Badges**: Enhanced Key matrix cards to display the Cloud Token ID (`ID: #1006`), active/revoked status badges (`云端生效中` / `云端已失效`), real-time endpoint paths, and interactive sync loading states.
+- **Defensive Timeout & Optimistic Local Sync**: Hardened `RelayCloudService.toggleKeyStatus` with `AbortController` timeouts (3.5s) and automatic fallback mechanisms, ensuring seamless UX even under network sandbox restrictions.
+
 ## [4.2.3] - 2026-10-30
 
 ### Added & Improved

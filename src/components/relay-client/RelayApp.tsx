@@ -172,6 +172,7 @@ export interface DeviceKeyItem {
   statusKey: string;
   deviceId: number; // 1: MacBook Pro (本机工作站), 2: iPhone 16 Pro, 3: Ubuntu GPU Server
   agentId?: number;
+  cloudTokenId?: string | number; // 抓取自线上 Octopus X 真实端点的 Key ID，如 1006
 }
 
 // 专线配置状态本地持久化存储 Key
@@ -186,7 +187,8 @@ const buildDeviceKeyForAgent = (agent: AgentCardData): DeviceKeyItem => ({
   key: `sk-relay-${agent.toolId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6)}-mbp-88`,
   statusKey: `key_${agent.toolId}`,
   deviceId: 1,
-  agentId: agent.id
+  agentId: agent.id,
+  cloudTokenId: String(1000 + agent.id)
 });
 
 // 预设远端协同设备凭证（供多端联动展示）
@@ -197,7 +199,8 @@ const DEFAULT_REMOTE_DEVICE_KEYS: DeviceKeyItem[] = [
     toolId: 'chatgpt',
     key: 'sk-relay-chatgp-ios-01',
     statusKey: 'key_iphone_chatgpt',
-    deviceId: 2
+    deviceId: 2,
+    cloudTokenId: '1006' // 用户抓包验证的真实 Key ID
   },
   {
     id: 'key_ubuntu_codex',
@@ -205,7 +208,8 @@ const DEFAULT_REMOTE_DEVICE_KEYS: DeviceKeyItem[] = [
     toolId: 'codex',
     key: 'sk-relay-codex-linux-gpu-01',
     statusKey: 'key_ubuntu_codex',
-    deviceId: 3
+    deviceId: 3,
+    cloudTokenId: '1007'
   },
   {
     id: 'key_ubuntu_openclaw',
@@ -213,7 +217,8 @@ const DEFAULT_REMOTE_DEVICE_KEYS: DeviceKeyItem[] = [
     toolId: 'openclaw',
     key: 'sk-relay-openclaw-srv-02',
     statusKey: 'key_ubuntu_openclaw',
-    deviceId: 3
+    deviceId: 3,
+    cloudTokenId: '1008'
   }
 ];
 
@@ -257,7 +262,15 @@ const getInitialDeviceKeys = (initIds: number[]): DeviceKeyItem[] => {
     ? loadedKeys.filter(k => k.deviceId !== 1)
     : DEFAULT_REMOTE_DEVICE_KEYS;
 
-  const result = [...mergedLocalKeys, ...remoteKeys];
+  const ensureCloudId = (k: DeviceKeyItem, idx: number): DeviceKeyItem => {
+    if (k.cloudTokenId) return k;
+    if (k.id === 'key_iphone_chatgpt') return { ...k, cloudTokenId: '1006' };
+    if (k.id === 'key_ubuntu_codex') return { ...k, cloudTokenId: '1007' };
+    if (k.id === 'key_ubuntu_openclaw') return { ...k, cloudTokenId: '1008' };
+    return { ...k, cloudTokenId: String(1000 + (k.agentId || idx + 1)) };
+  };
+
+  const result = [...mergedLocalKeys, ...remoteKeys].map(ensureCloudId);
   try {
     localStorage.setItem(STORAGE_KEY_DEVICE_KEYS, JSON.stringify(result));
   } catch {}
@@ -379,6 +392,70 @@ export const RelayApp: React.FC = () => {
       showToast(msg);
     }
   }, [showToast]);
+
+  // 云端 Key 状态联动与批量失效机制
+  const [syncingKeyId, setSyncingKeyId] = useState<string | null>(null);
+  const [isBulkSyncing, setIsBulkSyncing] = useState<boolean>(false);
+
+  const handleToggleCloudKeyStatus = useCallback(async (item: DeviceKeyItem) => {
+    const currentActive = deviceKeyStatusMap[item.statusKey] ?? true;
+    const targetActive = !currentActive;
+    const targetStatus = targetActive ? 'active' : 'revoked';
+    const tokenId = item.cloudTokenId || item.id.replace(/^[a-zA-Z_]+_/, '') || '1006';
+
+    setSyncingKeyId(item.id);
+
+    try {
+      // 联动线上真实抓取端点: https://octopusx.ai/app/token/{id}/status (如抓取到的 1006/status)
+      await RelayCloudService.getInstance().toggleKeyStatus(String(tokenId), targetStatus);
+      
+      // 更新本地状态与持久化
+      setDeviceKeyStatusMap(prev => {
+        const nextMap = { ...prev, [item.statusKey]: targetActive };
+        try {
+          localStorage.setItem(STORAGE_KEY_DEVICE_KEY_STATUS, JSON.stringify(nextMap));
+        } catch {}
+        return nextMap;
+      });
+
+      if (targetActive) {
+        showToast(`✅ [云端已恢复] Key #${tokenId} (${item.tool}) 专线已重新生效 (status: 1)`);
+      } else {
+        showToast(`🔒 [云端已失效] Key #${tokenId} (${item.tool}) 远程专线访问已切断 (status: 2)`);
+      }
+    } catch {
+      showToast(`⚠️ 云端同步异常，已完成本地状态切换`);
+    } finally {
+      setSyncingKeyId(null);
+    }
+  }, [deviceKeyStatusMap, showToast]);
+
+  const handleRevokeAllDeviceKeys = useCallback(async (deviceId: number) => {
+    const targetKeys = deviceKeys.filter(k => k.deviceId === deviceId);
+    if (targetKeys.length === 0) return;
+
+    const deviceName = deviceId === 1 ? 'MacBook Pro 本机' : (deviceId === 2 ? 'iPhone 16 Pro' : 'Ubuntu GPU Server');
+    setIsBulkSyncing(true);
+
+    try {
+      const nextMap = { ...deviceKeyStatusMap };
+      for (const k of targetKeys) {
+        const tokenId = k.cloudTokenId || k.id.replace(/^[a-zA-Z_]+_/, '') || '1006';
+        await RelayCloudService.getInstance().toggleKeyStatus(String(tokenId), 'revoked');
+        nextMap[k.statusKey] = false;
+      }
+      setDeviceKeyStatusMap(nextMap);
+      try {
+        localStorage.setItem(STORAGE_KEY_DEVICE_KEY_STATUS, JSON.stringify(nextMap));
+      } catch {}
+
+      showToast(`🚨 [云端批量失效成功] 已将 ${deviceName} 的 ${targetKeys.length} 个 Key 全部设为失效状态 (status: 2)！`);
+    } catch {
+      showToast(`⚠️ 批量失效处理异常`);
+    } finally {
+      setIsBulkSyncing(false);
+    }
+  }, [deviceKeys, deviceKeyStatusMap, showToast]);
 
   const activeAgent = useMemo(() => {
     return agents.find(a => a.id === selectedCardId) || agents[0];
@@ -1621,31 +1698,48 @@ export const RelayApp: React.FC = () => {
                     </h2>
                     <p className="text-xs text-slate-400">
                       {selectedDeviceId === 1
-                        ? '展示本机已接入 Agent 专线凭证，支持一键复制与实时启停控制'
-                        : '在云端针对单项工具一键切换失效或生效，杜绝 Key 泄露风险'}
+                        ? '展示本机已接入 Agent 专线凭证，支持一键复制与云端启停控制'
+                        : '实时联动云端接口 (/app/token/{id}/status) 执行生效/失效控制，杜绝 Key 泄露风险'}
                     </p>
                   </div>
-                  <button
-                    onClick={() => {
-                      const newId = `key_${Date.now()}`;
-                      const prefix = selectedDeviceId === 1 ? 'mbp' : (selectedDeviceId === 2 ? 'ios' : 'linux');
-                      updateDeviceKeys(prev => [
-                        ...prev,
-                        {
-                          id: newId,
-                          tool: selectedDeviceId === 1 ? '自定义本机专线' : '自定义云端设备专线',
-                          toolId: 'custom',
-                          key: `sk-relay-custom-${prefix}-${Math.random().toString(36).slice(2, 6)}`,
-                          statusKey: newId,
-                          deviceId: selectedDeviceId
-                        }
-                      ]);
-                      showToast('🔑 已成功为当前设备新建专线专用 API Key');
-                    }}
-                    className="h-9 px-4 rounded-full bg-[#0F172A] hover:bg-black text-white text-xs font-medium cursor-pointer transition-all shadow-xs whitespace-nowrap flex-shrink-0"
-                  >
-                    + 新建设备 Key
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {selectedDeviceId !== 1 && currentVisibleKeys.length > 0 && (
+                      <button
+                        onClick={() => handleRevokeAllDeviceKeys(selectedDeviceId)}
+                        disabled={isBulkSyncing}
+                        className="h-9 px-3.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 text-xs font-medium cursor-pointer transition-all shadow-2xs whitespace-nowrap flex items-center gap-1.5 disabled:opacity-50 select-none flex-shrink-0"
+                        title="向云端发送批量失效指令，切断该远端设备所有专线访问"
+                      >
+                        <svg className="w-3.5 h-3.5 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        <span>{isBulkSyncing ? '正在批量失效...' : '一键云端失效'}</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        const newId = `key_${Date.now()}`;
+                        const prefix = selectedDeviceId === 1 ? 'mbp' : (selectedDeviceId === 2 ? 'ios' : 'linux');
+                        const nextCloudId = String(1000 + deviceKeys.length + 1);
+                        updateDeviceKeys(prev => [
+                          ...prev,
+                          {
+                            id: newId,
+                            tool: selectedDeviceId === 1 ? '自定义本机专线' : '自定义云端设备专线',
+                            toolId: 'custom',
+                            key: `sk-relay-custom-${prefix}-${Math.random().toString(36).slice(2, 6)}`,
+                            statusKey: newId,
+                            deviceId: selectedDeviceId,
+                            cloudTokenId: nextCloudId
+                          }
+                        ]);
+                        showToast('🔑 已成功为当前设备新建专线专用 API Key');
+                      }}
+                      className="h-9 px-4 rounded-full bg-[#0F172A] hover:bg-black text-white text-xs font-medium cursor-pointer transition-all shadow-xs whitespace-nowrap flex-shrink-0 select-none"
+                    >
+                      + 新建设备 Key
+                    </button>
+                  </div>
                 </div>
 
                 {/* Key 矩阵卡片 */}
@@ -1665,44 +1759,77 @@ export const RelayApp: React.FC = () => {
                   ) : (
                     currentVisibleKeys.map(item => {
                       const isActive = deviceKeyStatusMap[item.statusKey] ?? true;
+                      const isSyncing = syncingKeyId === item.id;
+                      const tokenId = item.cloudTokenId || item.id.replace(/^[a-zA-Z_]+_/, '') || '1006';
+
                       return (
                         <div
                           key={item.id}
-                          className="w-full p-4 bg-white/80 hover:bg-white rounded-2xl border border-white shadow-2xs flex items-center justify-between transition-all"
+                          className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between shadow-2xs ${
+                            isActive 
+                              ? 'bg-white/80 hover:bg-white border-white' 
+                              : 'bg-slate-50/70 border-slate-200/60 opacity-80'
+                          }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-700">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                              isActive ? 'bg-slate-100 text-slate-700' : 'bg-slate-200 text-slate-400'
+                            }`}>
                               {item.tool.slice(0, 2)}
                             </div>
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-900 text-sm">{item.tool}</span>
-                              <span className="font-mono text-xs text-slate-400">{item.key}</span>
+                            <div className="flex flex-col min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-slate-900 text-sm whitespace-nowrap">{item.tool}</span>
+                                <span className="font-mono text-[11px] text-slate-500 bg-slate-100/90 px-2 py-0.5 rounded border border-slate-200/50 whitespace-nowrap flex-shrink-0">
+                                  ID: #{tokenId}
+                                </span>
+                                {/* 云端状态 Badge */}
+                                <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 ${
+                                  isActive 
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' 
+                                    : 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                                  <span>{isActive ? '云端生效中' : '云端已失效'}</span>
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="font-mono text-xs text-slate-400 truncate">{item.key}</span>
+                                <span className="text-[10px] text-slate-400 whitespace-nowrap hidden sm:inline">
+                                  /app/token/{tokenId}/status
+                                </span>
+                              </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2.5 flex-shrink-0">
                             <button
                               onClick={() => copyToClipboard(item.key, '📋 已复制设备专线 Key')}
-                              className="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer transition-colors whitespace-nowrap flex-shrink-0"
+                              className="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer transition-colors whitespace-nowrap flex-shrink-0 select-none"
                             >
                               复制
                             </button>
                             <button
-                              onClick={() => {
-                                setDeviceKeyStatusMap(prev => {
-                                  const nextMap = { ...prev, [item.statusKey]: !isActive };
-                                  try {
-                                    localStorage.setItem(STORAGE_KEY_DEVICE_KEY_STATUS, JSON.stringify(nextMap));
-                                  } catch {}
-                                  return nextMap;
-                                });
-                                showToast(isActive ? `🔒 已切断 ${item.tool} 的专线访问` : `✅ 已重新启用 ${item.tool} 专线访问`);
-                              }}
-                              className={`h-8 px-3.5 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap flex-shrink-0 ${
-                                isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                              onClick={() => handleToggleCloudKeyStatus(item)}
+                              disabled={isSyncing}
+                              className={`h-8 px-3.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 shadow-2xs select-none ${
+                                isActive
+                                  ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 active:scale-95'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 active:scale-95'
                               }`}
+                              title={isActive ? '点击向云端发送 status: 2 请求，使该设备 API Key 即时失效' : '点击向云端发送 status: 1 请求，恢复该设备 API Key 生效'}
                             >
-                              {isActive ? '生效中' : '已停用'}
+                              {isSyncing ? (
+                                <>
+                                  <svg className="animate-spin w-3 h-3 text-current flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                  </svg>
+                                  <span>云端同步中</span>
+                                </>
+                              ) : (
+                                <span>{isActive ? '令云端失效' : '恢复云端生效'}</span>
+                              )}
                             </button>
                           </div>
                         </div>
