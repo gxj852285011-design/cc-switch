@@ -1054,7 +1054,48 @@ export const RelayApp: React.FC = () => {
                     <div
                       key={a.id}
                       onClick={() => handleSelectCard(a.id)}
-                      className="agent-card w-full flex-1 min-h-[135px] bg-white/80 border border-white rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:bg-white hover:scale-[1.01] hover:shadow-xs"
+                      className={`agent-card w-full flex-1 min-h-[135px] ${isDrawerOpen && selectedCardId === a.id ? 'bg-white border-slate-300 ring-2 ring-slate-900/10 shadow-xs' : 'bg-white/80 border-white hover:bg-white'} rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:scale-[1.01] hover:shadow-xs`}
+                    >
+                      <div className="w-full flex flex-row justify-between items-center box-border">
+                        <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{a.svg}</div>
+                        {/* 右上角严格只区分是否安装 */}
+                        <span className={`text-[12px] leading-none text-right whitespace-nowrap flex items-center gap-1 font-medium ${
+                          a.badge === '已安装'
+                            ? 'text-[#262626]'
+                            : 'text-slate-400'
+                        }`}>
+                          <span>{a.badge}</span>
+                        </span>
+                      </div>
+                      <div className="w-full flex flex-col items-start gap-1 box-border my-auto">
+                        <h3 className="font-semibold text-[15px] leading-[19px] text-[#262626] capitalize whitespace-nowrap">{a.title}</h3>
+                        <p className="font-normal text-[12px] leading-[16px] text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis w-full pr-1">{a.sub}</p>
+                      </div>
+                      {/* 按钮严格区分是否配置 */}
+                      <button
+                        onClick={(e) => handleCardButtonClick(e, a)}
+                        className={`h-[30px] min-w-[76px] px-3.5 rounded-full flex items-center justify-center text-[12px] font-medium leading-[15px] transition-all whitespace-nowrap select-none gap-1.5 ${
+                          a.isConfigured
+                            ? 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
+                            : 'bg-white/90 hover:bg-white text-slate-800 border border-slate-200/90 shadow-2xs hover:border-slate-300'
+                        }`}
+                      >
+                        {a.isConfigured && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        )}
+                        <span>{a.btnLabel}</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 第 2 列 (高度自动填充并均分容器高度) */}
+                <div id="expanded-col-2" className="flex-1 min-w-[250px] max-w-[380px] h-full flex flex-col justify-between gap-[14px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 1 }}>
+                  {col2Agents.map(a => (
+                    <div
+                      key={a.id}
+                      onClick={() => handleSelectCard(a.id)}
+                      className={`agent-card w-full flex-1 min-h-[135px] ${isDrawerOpen && selectedCardId === a.id ? 'bg-white border-slate-300 ring-2 ring-slate-900/10 shadow-xs' : 'bg-white/80 border-white hover:bg-white'} rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:scale-[1.01] hover:shadow-xs`}
                     >
                       <div className="w-full flex flex-row justify-between items-center box-border">
                         <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{a.svg}</div>
@@ -1093,7 +1134,7 @@ export const RelayApp: React.FC = () => {
                 <div
                   id="expanded-drawer"
                   className={`${isDrawerOpen ? 'drawer-expanded' : 'drawer-collapsed hidden'} h-full bg-white/85 rounded-[24px] backdrop-blur-md flex flex-col justify-between p-5 relative box-border transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] border border-white`}
-                  style={{ order: 1 }}
+                  style={{ order: 2 }}
                 >
                   <div className="w-full flex flex-col items-start gap-3 flex-grow box-border drawer-content-box-anim overflow-y-auto no-scrollbar">
                     
@@ -1493,46 +1534,7 @@ export const RelayApp: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 第 2 列 (高度自动填充并均分容器高度) */}
-                <div id="expanded-col-2" className="flex-1 min-w-[250px] max-w-[380px] h-full flex flex-col justify-between gap-[14px] flex-shrink-0 box-border transition-all duration-300 no-scrollbar" style={{ order: 2 }}>
-                  {col2Agents.map(a => (
-                    <div
-                      key={a.id}
-                      onClick={() => handleSelectCard(a.id)}
-                      className="agent-card w-full flex-1 min-h-[135px] bg-white/80 border border-white rounded-[32px] p-5 flex flex-col justify-between items-start box-border backdrop-blur-[10px] cursor-pointer flex-shrink-0 select-none transition-all hover:bg-white hover:scale-[1.01] hover:shadow-xs"
-                    >
-                      <div className="w-full flex flex-row justify-between items-center box-border">
-                        <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">{a.svg}</div>
-                        {/* 右上角严格只区分是否安装 */}
-                        <span className={`text-[12px] leading-none text-right whitespace-nowrap flex items-center gap-1 font-medium ${
-                          a.badge === '已安装'
-                            ? 'text-[#262626]'
-                            : 'text-slate-400'
-                        }`}>
-                          <span>{a.badge}</span>
-                        </span>
-                      </div>
-                      <div className="w-full flex flex-col items-start gap-1 box-border my-auto">
-                        <h3 className="font-semibold text-[15px] leading-[19px] text-[#262626] capitalize whitespace-nowrap">{a.title}</h3>
-                        <p className="font-normal text-[12px] leading-[16px] text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis w-full pr-1">{a.sub}</p>
-                      </div>
-                      {/* 按钮严格区分是否配置 */}
-                      <button
-                        onClick={(e) => handleCardButtonClick(e, a)}
-                        className={`h-[30px] min-w-[76px] px-3.5 rounded-full flex items-center justify-center text-[12px] font-medium leading-[15px] transition-all whitespace-nowrap select-none gap-1.5 ${
-                          a.isConfigured
-                            ? 'bg-[#0F172A] hover:bg-black text-white shadow-xs'
-                            : 'bg-white/90 hover:bg-white text-slate-800 border border-slate-200/90 shadow-2xs hover:border-slate-300'
-                        }`}
-                      >
-                        {a.isConfigured && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        )}
-                        <span>{a.btnLabel}</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
+
 
               </div>
             </div>

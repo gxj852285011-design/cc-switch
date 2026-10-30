@@ -15,7 +15,7 @@ export interface CheckOptions {
   channel?: UpdateChannel;
 }
 
-export const APP_CURRENT_VERSION = "4.2.2";
+export const APP_CURRENT_VERSION = "4.2.3";
 
 /**
  * 语义化版本比对:

@@ -1,0 +1,26 @@
+{
+  "version": "4.2.3",
+  "items": [
+    {
+      "type": "improve",
+      "zh": "工作台详情抽屉在卡片右侧弹出，保持双列卡片平铺连续性",
+      "zh-TW": "工作台詳情抽屜在卡片右側彈出，保持雙列卡片平鋪連續性",
+      "en": "Detail drawer now slides out to the right of cards, preserving 2-column layout",
+      "ja": "詳細ドロワーがカードの右側に展開し、2列カードの視覚的一体性を維持"
+    },
+    {
+      "type": "improve",
+      "zh": "激活卡片高亮与选中聚焦反馈",
+      "zh-TW": "激活卡片高亮與選中聚焦反饋",
+      "en": "Card active selection highlight and visual focus indicators",
+      "ja": "アクティブカードのハイライトと選択フォーカス表示"
+    },
+    {
+      "type": "improve",
+      "zh": "全栈统一发版质检体系与自动化交付保障",
+      "zh-TW": "全棧統一發版質檢體系與自動化交付保障",
+      "en": "Strict 6-step full-stack release checklist and verified DMG distribution",
+      "ja": "6段階のフルスタックリリース監査とDMG自動配信保証"
+    }
+  ]
+}

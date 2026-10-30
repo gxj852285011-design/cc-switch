@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Detailed Chinese iteration records and QA checklists are maintained in [docs/ITERATION_LOG.md](docs/ITERATION_LOG.md).
 
+## [4.2.3] - 2026-10-30
+
+### Added & Improved
+- **Right-Side Detail Drawer Positioning**: Repositioned the dynamic configuration/details drawer to the far right of the stage (`order: 2`), ensuring Column 1 and Column 2 card columns (`order: 0`, `order: 1`) remain contiguous and side-by-side as a unified 6-agent grid rather than being split by the drawer.
+- **Active Card Selection & Focus Highlight**: Added instant visual focus feedback (`ring-2 ring-slate-900/10 border-slate-300 bg-white shadow-xs`) on active agent cards when the detail drawer is open.
+- **Institutionalized 6-Step Full-Stack Release Pipeline**: Enforced strict synchronization across `Cargo.toml`, `Cargo.lock`, `package.json`, `updater.ts`, and GitHub Release assets, guaranteeing zero version discrepancies or stale DMG fallbacks.
+
 ## [4.2.2] - 2026-10-29
 
 ### Added & Improved
