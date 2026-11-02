@@ -149,11 +149,7 @@ fn apply_claude_desktop_config(api_key: &str, base_url: &str) -> Result<(), Stri
         "inferenceGatewayAuthScheme": "bearer",
         "inferenceGatewayBaseUrl": base_url,
         "inferenceProvider": "gateway",
-        "inferenceModels": [
-            {"name": "claude-sonnet-5"},
-            {"name": "claude-opus-5"},
-            {"name": "claude-haiku-4-5"}
-        ]
+        "inferenceCredentialKind": "static"
     });
     fs::write(&profile_file, serde_json::to_string_pretty(&profile_json).unwrap_or_default())
         .map_err(|e| format!("写入 profile 失败: {e}"))?;
