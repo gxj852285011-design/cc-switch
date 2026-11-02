@@ -36,6 +36,7 @@ mod sync_support;
 mod xai_oauth;
 
 mod lightweight;
+mod relay;
 mod s3_sync;
 mod usage;
 mod webdav_sync;
@@ -76,6 +77,7 @@ pub use subscription::*;
 pub use xai_oauth::*;
 
 pub use lightweight::*;
+pub use relay::*;
 pub use s3_sync::*;
 pub use usage::*;
 pub use webdav_sync::*;

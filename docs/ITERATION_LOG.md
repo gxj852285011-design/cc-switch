@@ -8,7 +8,8 @@
 1. [版本管理规范与发布准则](#一版本管理规范与发布准则)
 2. [版本演进全景速览](#二版本演进全景速览)
 3. [详细迭代记录](#三详细迭代记录)
-   - [v4.2.1 (2026-10-29) - 核心工具链对齐、设备强同步与企业级脱敏](#v421-2026-10-29---核心工具链对齐设备强同步与企业级脱敏)
+   - [v4.2.5 (2026-11-01) - Claude 桌面端 3P 网关与专线凭证真实写入与防弹唤醒](#v425-2026-11-01---claude-桌面端-3p-网关与专线凭证真实写入与防弹唤醒)
+   - [v4.2.4 (2026-10-30) - 云端远程设备 API Key 失效与状态实时联动](#v424-2026-10-30---云端远程设备-api-key-失效与状态实时联动)
    - [v4.2.0 (2026-10-28) - 独立品牌重构、应用脱耦与防封专线架构](#v420-2026-10-28---独立品牌重构应用脱耦与防封专线架构)
    - [v4.1.0 (2026-10-27) - 零信任专线接入与 NetBird 审计引擎](#v410-2026-10-27---零信任专线接入与-netbird-审计引擎)
 4. [版本发布质检核对清单 (Checklist)](#四版本发布质检核对清单-checklist)
@@ -61,7 +62,8 @@
 
 | 版本号 | 发布日期 | 迭代主题 / 核心定位 | 核心改动摘要 | 质量与安全状态 |
 | :--- | :--- | :--- | :--- | :--- |
-| **v4.2.4** | **2026-10-30** | **云端远程设备 API Key 失效与状态实时联动** | 接入线上真实抓取端点（`https://octopusx.ai/app/token/{id}/status`），在设备管理中支持一键令远程设备 API Key 失效（`status: 2`）或恢复生效（`status: 1`）；新增远端设备「一键云端失效」批量紧急安全阻断能力；设备 Key 卡片展示云端 Token ID、端点路径与活跃状态徽标；超时容灾与本地乐观同步；全栈六步发版闭环。 | 全栈对齐，构建通过，生产包与 Release 就绪 |
+| **v4.2.5** | **2026-11-01** | **Claude 桌面端 3P 网关与专线凭证真实写入与防弹唤醒** | 彻底修复配置专线只修改内存状态未写入本地磁盘导致 Claude 桌面端报未登录/需要输入 API Key 的问题；Rust 后端原生实现 `apply_relay_config` 写入 Claude 3P 配置文件（`deploymentMode: "3p"`、`configLibrary` 专线网关地址与 Key）；一键唤醒前置守卫校验与注入；全栈六步发版闭环。 | 全栈对齐，构建通过，生产包与 Release 就绪 |
+| **v4.2.4** | 2026-10-30 | 云端远程设备 API Key 失效与状态实时联动 | 接入线上真实抓取端点（`https://octopusx.ai/app/token/{id}/status`），在设备管理中支持一键令远程设备 API Key 失效（`status: 2`）或恢复生效（`status: 1`）；新增远端设备「一键云端失效」批量紧急安全阻断能力；设备 Key 卡片展示云端 Token ID、端点路径与活跃状态徽标；超时容灾与本地乐观同步；全栈六步发版闭环。 | 全栈对齐，构建通过，生产包与 Release 就绪 |
 | **v4.2.3** | 2026-10-30 | 详情抽屉移至卡片最右侧、卡片双列平铺连续性与交互聚焦反馈 | 响应用户交互偏好，将详情抽屉移至卡片矩阵最右侧（`order: 2`），保持第 1 列与第 2 列卡片平铺连续性，彻底消除抽屉将卡片生硬拆散的问题；新增选中卡片实时高亮与聚焦环（`ring-2 ring-slate-900/10`）；全栈严守六步发版红线。 | 全栈对齐，构建通过，生产包与 Release 就绪 |
 | **v4.2.2** | 2026-10-29 | 工作台卡片高度自适应填充、舞台双向齐平与 1047px 宽度自适应锁死 | 全栈锁死 1047px 最小窗口宽度（Tauri/AppKit + 前端 min-w）；卡片列弹性自适应拉伸（`flex-1 min-w-[250px] max-w-[380px]`）；Agent 卡片垂直弹性自动填充（`flex-1 min-h-[135px]`）；卡片圆角升级为 `rounded-[32px]`；第 3 行卡片与 Hero 底部操作按钮水平基线完全齐平；抽屉展开/折叠舞台总宽数学对称，彻底杜绝横向挤压与边缘留白。 | 构建通过，视觉基线精准对齐，生产包就绪 |
 | **v4.2.1** | 2026-10-29 | 核心工具链对齐、设备强同步、隐私脱敏与白屏防御 | 切换 6 大海外开发者 Agent 矩阵；接入与设备管理 Key 双向强同步；内置 OTA 原生热更新；DMG 集成 Gatekeeper 一键修复脚本；全仓清除开发者隐私与 Token；全链路白屏防御。 | 56/56 测试通过，0 个人信息泄漏，生产包构建成功 |
@@ -71,6 +73,28 @@
 ---
 
 ## 三、详细迭代记录
+
+### [v4.2.5] - 2026-11-01
+
+#### 🎯 迭代核心目标
+针对用户反馈的真实痛点：“点击配置，但是并不能直接进入 Claude 页面，发现并没有配置 API（弹出 Use your Claude API account 提示框）”，排查根因在于点击“一键配置/立即配置专线”时仅更新了前端 React 内存状态与 localStorage，未将专线网关地址与 Key 写入 macOS 磁盘对应的 Claude 配置中。本版本通过 Rust 原生命令 `apply_relay_config` 深度注入 Claude Desktop 3P 网关与专线凭证，并在唤醒应用前执行守卫校验，实现“点击即用、直通主界面”。
+
+#### 1. Claude Desktop 3P 网关深度注入 (3P Gateway Config Injection)
+- **逆向探明 Claude 3P 启动标准**：
+  - 确认 Claude 桌面端开启专线模式依赖本地 3P 目录结构与网关配置库。
+  - Rust 原生后端自动创建并写入：
+    - `~/Library/Application Support/Claude/claude_desktop_config.json` (`deploymentMode: "3p"`)
+    - `~/Library/Application Support/Claude-3p/claude_desktop_config.json` (`deploymentMode: "3p"`)
+    - `~/Library/Application Support/Claude-3p/configLibrary/_meta.json` (指向专线网关 UUID)
+    - `~/Library/Application Support/Claude-3p/configLibrary/00000000-0000-4000-8000-000000157210.json` (注入 `inferenceGatewayBaseUrl`、`inferenceGatewayApiKey`、`inferenceProvider: "gateway"` 与模型列表)
+- **多客户端 CLI 同步写入**：
+  - Claude Code CLI：写入 `~/.claude/settings.json`（注入 `ANTHROPIC_BASE_URL` 与 `ANTHROPIC_AUTH_TOKEN`）。
+  - Codex / ChatGPT CLI：写入 `~/.codex/config.json`。
+
+#### 2. 桌面客户端唤醒前置防弹守卫 (Pre-Launch Guard & Auto-Inject)
+- **启动前自动补全配置**：
+  - 用户在工作台点击“🚀 唤醒 / 打开桌面客户端”时，底层自动检测并调用 `applyKeyToLocalCli('claude-desktop', ...)`，确保即使未手动点过配置按钮也能在拉起客户端前完成 3P 配置写入。
+  - 彻底消除了 Claude 启动时弹出 "Use your Claude API account" / "Sign in with Claude Console" 拦截画面的问题，直接进入 Cowork 对话主界面并激活 `Gateway` 专线。
 
 ### [v4.2.4] - 2026-10-30
 

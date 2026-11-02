@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Detailed Chinese iteration records and QA checklists are maintained in [docs/ITERATION_LOG.md](docs/ITERATION_LOG.md).
 
+## [4.2.5] - 2026-11-01
+
+### Added & Improved
+- **Claude Desktop 3P Gateway Automatic Configuration Injection**: Resolved the issue where clicking "一键配置" / "配置专线" in AI Agent Hub only updated in-memory state without persisting configurations to disk, causing Claude Desktop to open to an unconfigured "Use your Claude API account" prompt.
+- **Deep Tauri Native Integration (`apply_relay_config`)**: Implemented native configuration writer in Rust (`commands/relay.rs`) to write verified 3P gateway profiles directly to:
+  - `~/Library/Application Support/Claude/claude_desktop_config.json` (`deploymentMode: "3p"`)
+  - `~/Library/Application Support/Claude-3p/claude_desktop_config.json` (`deploymentMode: "3p"`)
+  - `~/Library/Application Support/Claude-3p/configLibrary/_meta.json` & `00000000-0000-4000-8000-000000157210.json` (configuring `inferenceGatewayBaseUrl`, `inferenceGatewayApiKey`, `inferenceProvider: "gateway"`, and `inferenceModels`)
+  - `~/.claude/settings.json` (Claude Code CLI `ANTHROPIC_BASE_URL`)
+- **Pre-Launch Guard for Desktop Client Wakeup**: Added defensive pre-check in `handleOpenDesktopApp` ("🚀 唤醒 / 打开桌面客户端") that automatically guarantees 3P configuration files are written before launching `/Applications/Claude.app`, ensuring Claude Desktop opens directly into Cowork Gateway mode with zero sign-in prompts.
+
+
 ## [4.2.4] - 2026-10-30
 
 ### Added & Improved

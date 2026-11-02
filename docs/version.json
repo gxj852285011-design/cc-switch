@@ -1,7 +1,7 @@
 {
-  "version": "4.2.4",
-  "name": "AI Agent Hub v4.2.4",
-  "pub_date": "2026-10-30T03:45:00Z",
-  "notes": "• 云端设备管理联动线上真实端点 (/app/token/{id}/status)，支持单键令远程设备 API Key 失效或恢复生效\n• 新增「一键云端失效」紧急安全阻断能力，全量切断远端设备所有专线访问\n• 设备 Key 卡片展示云端 Token ID、端点路径与活跃状态徽标，反馈更清晰\n• 严格执行全栈发版六步闭环，提供验证无误的正式 Release DMG 资产",
-  "download_url": "https://github.com/gxj852285011-design/cc-switch/releases/download/v4.2.4/AI_Agent_Hub_4.2.4_aarch64.dmg"
+  "version": "4.2.5",
+  "name": "AI Agent Hub v4.2.5",
+  "pub_date": "2026-11-02T03:50:00Z",
+  "notes": "• 彻底解决 Claude 桌面端点击配置后无法直接进入对话界面的问题\n• 新增原生 3P 网关与专线 API 密钥底层自动注入命令 (apply_relay_config)\n• 启动与唤醒 Claude 桌面端时自动前置保障 3P 网关配置文件就绪，杜绝弹窗提示输入 API Key\n• 同步优化 Claude Code CLI、Codex CLI 与 Gemini 的专线配置落盘机制",
+  "download_url": "https://github.com/gxj852285011-design/cc-switch/releases/download/v4.2.5/AI_Agent_Hub_4.2.5_aarch64.dmg"
 }

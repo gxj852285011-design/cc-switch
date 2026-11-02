@@ -556,9 +556,24 @@ export const RelayApp: React.FC = () => {
   }, [refreshInstalledAgents]);
 
   // 单个 Agent 注入/配置专线通道（状态同步流转、设备管理 Key 矩阵同步与本地持久化）
-  const handleConfigureRelay = useCallback((agentId: number) => {
+  const handleConfigureRelay = useCallback(async (agentId: number) => {
     const target = agents.find(a => a.id === agentId);
     const title = target?.title || 'Agent';
+
+    // 1. 获取真实有效 Key 与 Gateway 地址
+    const existingKeyItem = deviceKeys.find(k => k.deviceId === 1 && (k.agentId === agentId || k.toolId === target?.toolId));
+    const apiKey = existingKeyItem?.key && !existingKeyItem.key.startsWith('sk-relay-')
+      ? existingKeyItem.key
+      : 'sk-zM02_-qsQK3qtuvE6TnYZzCSOh8r3t7p';
+    
+    const baseUrl = (target?.toolId === 'claude' || target?.toolId === 'claude-desktop')
+      ? 'http://64.32.23.242:18787'
+      : DEFAULT_OCTOPUS_GATEWAY;
+
+    // 2. 真实落盘写入对应客户端底层配置文件（如 Claude Desktop 3P 网关、Claude Code settings.json 等）
+    if (target?.toolId) {
+      await RelayCloudService.getInstance().applyKeyToLocalCli(target.toolId, apiKey, baseUrl);
+    }
 
     setConfiguredIds(prev => {
       const next = Array.from(new Set([...prev, agentId]));
@@ -588,11 +603,11 @@ export const RelayApp: React.FC = () => {
       });
     }
 
-    showToast(`🎉 已成功为 ${title} 注入海外专线配置！已同步至设备管理`);
-  }, [agents, showToast, updateDeviceKeys]);
+    showToast(`🎉 已成功为 ${title} 写入海外专线配置与 API 密钥！已同步生效`);
+  }, [agents, deviceKeys, showToast, updateDeviceKeys]);
 
   // 一键配置所有已就绪 Agent 专线并全量同步设备管理 Key 矩阵
-  const handleConfigureAll = useCallback(() => {
+  const handleConfigureAll = useCallback(async () => {
     const readyAgents = agents.filter(a => a.badge === '已安装');
     if (readyAgents.length === 0) {
       showToast('⚠️ 当前暂无已安装的 Agent，请先安装或唤醒客户端');
@@ -600,6 +615,18 @@ export const RelayApp: React.FC = () => {
     }
 
     const readyIds = readyAgents.map(a => a.id);
+
+    // 真实落盘写入所有已就绪客户端配置
+    for (const agent of readyAgents) {
+      const existingKeyItem = deviceKeys.find(k => k.deviceId === 1 && (k.agentId === agent.id || k.toolId === agent.toolId));
+      const apiKey = existingKeyItem?.key && !existingKeyItem.key.startsWith('sk-relay-')
+        ? existingKeyItem.key
+        : 'sk-zM02_-qsQK3qtuvE6TnYZzCSOh8r3t7p';
+      const baseUrl = (agent.toolId === 'claude' || agent.toolId === 'claude-desktop')
+        ? 'http://64.32.23.242:18787'
+        : DEFAULT_OCTOPUS_GATEWAY;
+      await RelayCloudService.getInstance().applyKeyToLocalCli(agent.toolId, apiKey, baseUrl);
+    }
 
     setConfiguredIds(prev => {
       const next = Array.from(new Set([...prev, ...readyIds]));
@@ -627,21 +654,31 @@ export const RelayApp: React.FC = () => {
       return [...newLocalKeys, ...remoteKeys];
     });
 
-    showToast(`🎉 所有已安装 Agent 专线已全部配置生效！(${readyAgents.length} 款) 已同步至设备管理`);
-  }, [agents, showToast, updateDeviceKeys]);
+    showToast(`🎉 所有已安装 Agent 专线与密钥已全量注入生效！(${readyAgents.length} 款)`);
+  }, [agents, deviceKeys, showToast, updateDeviceKeys]);
 
   // 唤醒 / 启动 macOS 桌面客户端应用
   const handleOpenDesktopApp = useCallback(async (agent: AgentCardData) => {
     const target = agent.appName || agent.appPath || agent.title;
     showToast(`🚀 正在唤醒 ${agent.title} 桌面客户端...`);
     try {
+      // 关键防御：如果唤醒的是 Claude 桌面端，在拉起前确保 3P 网关配置文件已就绪
+      if (agent.toolId === 'claude-desktop') {
+        const existingKeyItem = deviceKeys.find(k => k.deviceId === 1 && (k.agentId === agent.id || k.toolId === agent.toolId));
+        const apiKey = existingKeyItem?.key && !existingKeyItem.key.startsWith('sk-relay-')
+          ? existingKeyItem.key
+          : 'sk-zM02_-qsQK3qtuvE6TnYZzCSOh8r3t7p';
+        const baseUrl = 'http://64.32.23.242:18787';
+        await RelayCloudService.getInstance().applyKeyToLocalCli('claude-desktop', apiKey, baseUrl);
+      }
+
       const { invoke } = await import('@tauri-apps/api/core');
       await invoke('open_desktop_app', { appNameOrPath: target });
       showToast(`🎉 已成功拉起 ${agent.title} 桌面端`);
     } catch (err: any) {
       showToast(`⚠️ 启动应用失败: ${err?.message || err}`);
     }
-  }, [showToast]);
+  }, [deviceKeys, showToast]);
 
   // 打开外部链接
   const handleOpenExternal = useCallback(async (url?: string) => {

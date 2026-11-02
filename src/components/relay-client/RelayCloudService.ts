@@ -298,50 +298,26 @@ export class RelayCloudService {
   }
 
   /**
-   * 将在中转站生成的 Key 零手工配置注入到本地对应 CLI 的底层文件
+   * 将在中转站生成的 Key 零手工配置注入到本地对应 CLI / 桌面端 (如 Claude Desktop) 的底层文件
    */
-  public async applyKeyToLocalCli(toolId: ToolId, apiKey: string, baseUrl: string): Promise<boolean> {
+  public async applyKeyToLocalCli(toolId: ToolId | string, apiKey: string, baseUrl: string): Promise<boolean> {
     if (this.isTauriEnv) {
       try {
         // @ts-ignore - optional dynamic Tauri IPC bridge in desktop environment
         const { invoke } = await import('@tauri-apps/api/core');
         
-        switch (toolId) {
-          case 'codex':
-            await invoke('apply_codex_relay_config', {
-              apiKey,
-              baseUrl,
-              model: 'gpt-4o'
-            });
-            break;
-            
-          case 'claude':
-          case 'claude-code':
-            await invoke('apply_claude_relay_config', {
-              apiKey,
-              baseUrl,
-              model: 'claude-3-7-sonnet'
-            });
-            break;
-            
-          case 'gemini':
-          case 'agy':
-            await invoke('apply_gemini_relay_config', {
-              apiKey,
-              baseUrl,
-              model: 'gemini-2.5-pro'
-            });
-            break;
-
-          default:
-            console.log(`[Octopus X] 针对 ${toolId} 的自动配置已通过 Tauri IPC 发送`);
-        }
+        await invoke('apply_relay_config', {
+          toolId,
+          apiKey,
+          baseUrl
+        });
+        console.log(`[Octopus X] 成功通过 Tauri apply_relay_config 写入 ${toolId} 底层配置`);
         return true;
       } catch (err) {
-        console.warn('[Octopus X] Tauri IPC 调用未就绪，使用本地静默模拟:', err);
+        console.warn('[Octopus X] apply_relay_config 调用失败:', err);
       }
     } else {
-      console.log(`[Octopus X] 自动写入本地 CLI: ${toolId} -> Key: ${apiKey.slice(0, 16)}... BaseURL: ${baseUrl}`);
+      console.log(`[Octopus X] 自动写入本地配置: ${toolId} -> Key: ${apiKey.slice(0, 16)}... BaseURL: ${baseUrl}`);
     }
     return true;
   }

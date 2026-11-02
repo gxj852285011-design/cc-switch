@@ -1,0 +1,20 @@
+{
+  "version": "4.2.5",
+  "date": "2026-11-02",
+  "title": "原生 3P 网关与专线 API 密钥自动注入",
+  "summary": "解决 Claude 桌面端无法直接进入对话界面的问题，一键配置自动写入 3P 专线网关与 API 密钥，客户端即开即用。",
+  "highlights": [
+    {
+      "tag": "核心修复",
+      "text": "一键配置与唤醒 Claude 桌面端自动落盘 3P 网关与 API Key 配置，彻底解决提示输入 API Key 的问题"
+    },
+    {
+      "tag": "专线网关",
+      "text": "原生适配 Claude Desktop 3P Gateway，无缝直连海外专线并展示网关标识"
+    },
+    {
+      "tag": "全量覆盖",
+      "text": "同步支持 Claude Code CLI、OpenAI Codex 与 Gemini 专线配置的一键落盘注入"
+    }
+  ]
+}
